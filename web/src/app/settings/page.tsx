@@ -28,7 +28,7 @@ export default function SettingsPage() {
     slack: Boolean(process.env.SLACK_WEBHOOK_URL),
   }
 
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const appUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
   const tactiqUrl = `${appUrl}/api/webhooks/tactiq`
   const secretSet = Boolean(process.env.TACTIQ_WEBHOOK_SECRET)
 

@@ -15,14 +15,18 @@ let cached: SupabaseClient | null = null
 export function supabaseAdmin(): SupabaseClient {
   if (cached) return cached
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  // Prefere variáveis de RUNTIME (não-públicas), que não dependem de build args
+  // do Docker. Cai para as NEXT_PUBLIC_* (úteis em dev) quando as de runtime não
+  // existem. Isso evita o erro "Supabase não configurado" em deploy (EasyPanel),
+  // onde as NEXT_PUBLIC_* são embutidas no build e podem vir vazias no servidor.
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const key = serviceKey || anonKey
 
   if (!url || !key) {
     throw new Error(
-      'Supabase não configurado. Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (ou NEXT_PUBLIC_SUPABASE_ANON_KEY) em .env.local',
+      'Supabase não configurado. Defina SUPABASE_URL (ou NEXT_PUBLIC_SUPABASE_URL) e SUPABASE_SERVICE_ROLE_KEY no ambiente.',
     )
   }
 

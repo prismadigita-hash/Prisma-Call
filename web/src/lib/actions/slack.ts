@@ -6,7 +6,7 @@ import { sendSlackSummary } from '@/lib/slack/notify'
 
 /** Send a test summary to the configured Slack webhook and log it. */
 export async function sendTestSlack() {
-  const base = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const base = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   const result = await sendSlackSummary({
     closerName: 'Closer de Teste',
     clientName: 'Cliente Exemplo',
