@@ -48,17 +48,21 @@ export function initials(name: string): string {
 }
 
 export const STATUS_LABELS: Record<string, string> = {
+  recebida: 'Recebida',
   pendente: 'Pendente',
   em_analise: 'Em análise',
   concluida: 'Concluída',
   revisada: 'Revisada',
+  erro_na_analise: 'Erro na análise',
   falhou: 'Falhou',
 }
 
 export const STATUS_TONE: Record<string, string> = {
+  recebida: 'bg-sky-50 text-sky-700 ring-sky-200',
   pendente: 'bg-slate-100 text-slate-600 ring-slate-200',
   em_analise: 'bg-amber-50 text-amber-700 ring-amber-200',
   concluida: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
   revisada: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
+  erro_na_analise: 'bg-rose-50 text-rose-700 ring-rose-200',
   falhou: 'bg-rose-50 text-rose-700 ring-rose-200',
 }

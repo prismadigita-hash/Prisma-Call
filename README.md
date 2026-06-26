@@ -109,6 +109,89 @@ npm run dev
 
 ---
 
+## 🔌 Integração com o Tactiq (webhook)
+
+Quando o **Tactiq** transcreve uma call, o sistema pode recebê-la automaticamente,
+salvar no Supabase e disparar a análise com Gemini.
+
+**Endpoint:** `POST /api/webhooks/tactiq`
+- Local: `http://localhost:3000/api/webhooks/tactiq`
+- Produção: `NEXT_PUBLIC_APP_URL` + `/api/webhooks/tactiq`
+
+A URL pronta para copiar aparece em **Configurações → Webhook do Tactiq**.
+
+### Payload esperado (JSON)
+
+```json
+{
+  "titulo_da_call": "Reunião comercial — Loja XPTO",
+  "data_da_call": "2026-06-26",
+  "closer": "Ana Closer",
+  "cliente": "Maria",
+  "empresa": "Loja XPTO Materiais",
+  "link_da_reuniao": "https://meet.google.com/...",
+  "transcricao": "Closer: ... Cliente: ...",
+  "participantes": ["Ana", "Maria"],
+  "origem": "tactiq"
+}
+```
+
+| Campo | Obrigatório | Observação |
+|---|---|---|
+| `transcricao` | **Sim** | Mín. 40 caracteres. Sem ela → erro amigável 400. |
+| `closer` | Não | Casa pelo nome (ou cria o Closer). Sem nome → "Não informado". |
+| `cliente` / `empresa` | Não | Viram o nome do cliente da call. |
+| `data_da_call` | Não | Sem data válida → usa a data atual. |
+| `link_da_reuniao` | Não | Salvo como link da gravação. |
+| `participantes` | Não | String ou array; entra no contexto da análise. |
+
+### Comportamento
+
+1. Valida a transcrição (erro 400 amigável se faltar).
+2. Salva a call com status **`recebida`**.
+3. Dispara a análise com Gemini e grava o resultado nas tabelas atuais.
+4. Se `SLACK_WEBHOOK_URL` estiver definido, envia o resumo ao Slack.
+5. Se a análise falhar, a call **continua salva** com status **`erro_na_analise`** e o erro vai para `webhook_logs`.
+6. Sem `GEMINI_API_KEY` (modo manual), a call fica como `recebida` (sem análise).
+
+> Requer a migration **0003** aplicada (novos status + tabela `webhook_logs`).
+> Rode `supabase/migrations/0003_tactiq_webhook.sql` ou re-cole o `supabase/schema.sql`.
+
+### Segurança (opcional)
+
+Defina `TACTIQ_WEBHOOK_SECRET` no `.env.local`. Com isso, o request precisa enviar
+o header `x-webhook-secret` (ou `?secret=`) com o mesmo valor — caso contrário, `401`.
+
+### Conectando Tactiq + Zapier/Make
+
+O Tactiq não chama webhooks arbitrários direto; use **Zapier** ou **Make** como ponte:
+
+**Zapier**
+1. **Trigger:** Tactiq → "New Meeting Transcript" (conecte sua conta Tactiq).
+2. **Action:** "Webhooks by Zapier" → **POST**.
+   - URL: a URL do webhook (Configurações → Webhook do Tactiq).
+   - Payload Type: **JSON**.
+   - Data: mapeie os campos do Tactiq para `titulo_da_call`, `data_da_call`, `closer`,
+     `cliente`, `empresa`, `link_da_reuniao`, `transcricao`, `participantes`.
+   - Headers (se usar segredo): `x-webhook-secret: SEU_SEGREDO`.
+3. Teste o Zap — uma call de teste deve aparecer em **Calls**.
+
+**Make (Integromat)**
+1. **Módulo Tactiq** (ou Watch via webhook do Tactiq) como gatilho.
+2. **HTTP → Make a request:** método **POST**, URL do webhook, Body type **Raw / JSON**,
+   header `Content-Type: application/json` (e `x-webhook-secret` se aplicável).
+3. Monte o JSON com os campos acima e rode o cenário.
+
+**Teste rápido (curl)**
+
+```bash
+curl -X POST http://localhost:3000/api/webhooks/tactiq \
+  -H "Content-Type: application/json" \
+  -d '{"closer":"Ana Closer","cliente":"Maria","empresa":"Loja XPTO","transcricao":"Closer: Oi Maria... Cliente: Quanto custa?..."}'
+```
+
+---
+
 ## 🧭 Roadmap (fase 2+)
 
 - Transcrição automática de áudio/vídeo com diarização (Whisper/Deepgram).

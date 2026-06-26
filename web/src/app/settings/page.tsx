@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { CheckCircle2, XCircle, ExternalLink } from 'lucide-react'
-import { PageHeader, Card, CardBody, SectionTitle } from '@/components/ui'
+import { CheckCircle2, XCircle, ExternalLink, Webhook } from 'lucide-react'
+import { PageHeader, Card, CardBody, SectionTitle, Pill } from '@/components/ui'
+import { CopyField } from '@/components/copy-field'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +28,10 @@ export default function SettingsPage() {
     slack: Boolean(process.env.SLACK_WEBHOOK_URL),
   }
 
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const tactiqUrl = `${appUrl}/api/webhooks/tactiq`
+  const secretSet = Boolean(process.env.TACTIQ_WEBHOOK_SECRET)
+
   return (
     <>
       <PageHeader title="Configurações" subtitle="Status das integrações e variáveis de ambiente" />
@@ -43,13 +48,45 @@ export default function SettingsPage() {
         </CardBody>
       </Card>
 
+      {/* Webhook do Tactiq */}
+      <Card className="mb-6">
+        <CardBody>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white">
+              <Webhook size={18} />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-base font-semibold text-slate-900">Webhook do Tactiq</h2>
+              <p className="text-sm text-slate-500">Recebe calls transcritas e dispara a análise automaticamente</p>
+            </div>
+            <Pill tone={secretSet ? 'emerald' : 'amber'}>{secretSet ? 'Protegido por segredo' : 'Sem segredo'}</Pill>
+          </div>
+
+          <div className="space-y-3">
+            <CopyField label="URL do webhook (use esta no Zapier/Make ou no Tactiq)" value={tactiqUrl} />
+            <CopyField label="Exemplo local" value="http://localhost:3000/api/webhooks/tactiq" />
+          </div>
+
+          <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+            <p className="font-semibold text-slate-700">Como usar</p>
+            <ol className="mt-1 list-inside list-decimal space-y-0.5">
+              <li>Método <code className="rounded bg-slate-200 px-1">POST</code> · Content-Type <code className="rounded bg-slate-200 px-1">application/json</code>.</li>
+              <li>Envie o campo <code className="rounded bg-slate-200 px-1">transcricao</code> (obrigatório) + closer, cliente, empresa, data_da_call, link_da_reuniao, participantes.</li>
+              <li>Em produção, a URL usa <code className="rounded bg-slate-200 px-1">NEXT_PUBLIC_APP_URL</code> automaticamente.</li>
+              <li>Opcional: defina <code className="rounded bg-slate-200 px-1">TACTIQ_WEBHOOK_SECRET</code> e envie no header <code className="rounded bg-slate-200 px-1">x-webhook-secret</code>.</li>
+            </ol>
+            <p className="mt-2">Passo a passo completo (Tactiq + Zapier/Make) no <code className="rounded bg-slate-200 px-1">README.md</code>.</p>
+          </div>
+        </CardBody>
+      </Card>
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card>
           <CardBody>
             <SectionTitle title="Banco de dados" />
             <p className="text-sm text-slate-600">
-              As migrations ficam em <code className="rounded bg-slate-100 px-1">supabase/migrations</code>. Rode os dois
-              arquivos no SQL Editor do seu projeto, na ordem (0001 e 0002).
+              As migrations ficam em <code className="rounded bg-slate-100 px-1">supabase/migrations</code>. Rode no
+              SQL Editor na ordem (0001, 0002, 0003) — ou cole o <code className="rounded bg-slate-100 px-1">supabase/schema.sql</code> de uma vez.
             </p>
           </CardBody>
         </Card>

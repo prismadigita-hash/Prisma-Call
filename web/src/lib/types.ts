@@ -1,9 +1,15 @@
 // Domain types mirroring the database schema (see supabase/migrations).
 
-export type CallStatus = 'pendente' | 'em_analise' | 'concluida' | 'revisada'
+export type CallStatus =
+  | 'recebida'
+  | 'pendente'
+  | 'em_analise'
+  | 'concluida'
+  | 'revisada'
+  | 'erro_na_analise'
 export type AnalysisStatus = 'pendente' | 'em_analise' | 'concluida' | 'falhou'
 export type ActionStatus = 'pendente' | 'em_andamento' | 'aplicada' | 'descartada'
-export type CallSource = 'transcricao' | 'link' | 'audio' | 'video'
+export type CallSource = 'transcricao' | 'link' | 'audio' | 'video' | 'tactiq'
 
 export interface Closer {
   id: string
