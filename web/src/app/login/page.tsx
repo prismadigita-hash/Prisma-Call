@@ -60,7 +60,7 @@ export default async function LoginPage({
       </Card>
 
       <p className="mt-4 text-center text-xs text-slate-400">
-        Autenticação opcional nesta fase — o sistema continua acessível sem login até a ativação completa.
+        Acesso restrito — faça login para entrar no sistema.
       </p>
     </div>
   )

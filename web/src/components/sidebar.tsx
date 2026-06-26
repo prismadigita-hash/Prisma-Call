@@ -10,8 +10,10 @@ import {
   Settings,
   MessageSquare,
   Sparkles,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { signOut } from '@/lib/actions/auth'
 
 const NAV = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -57,10 +59,15 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
-        <p className="font-semibold text-slate-700">MVP</p>
-        <p className="mt-0.5">Transcrição → IA → Slack → Evolução</p>
-      </div>
+      <form action={signOut} className="mt-auto">
+        <button
+          type="submit"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-rose-50 hover:text-rose-700"
+        >
+          <LogOut size={18} className="text-slate-400" />
+          Sair
+        </button>
+      </form>
     </aside>
   )
 }
