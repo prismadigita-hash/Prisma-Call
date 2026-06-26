@@ -1,0 +1,23 @@
+# Root-level ignores (the Next.js app keeps its own .gitignore inside web/)
+
+# Dependencies
+**/node_modules/
+
+# Next.js build output
+web/.next/
+web/out/
+web/build/
+
+# Env files (never commit secrets)
+**/.env
+**/.env.local
+**/.env*.local
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Supabase CLI local state
+supabase/.branches/
+supabase/.temp/
