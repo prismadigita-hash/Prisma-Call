@@ -1,0 +1,950 @@
+================================================================================
+CALL INTELLIGENCE — SALES COACHING IA
+ARQUIVO DE CONTEXTO COMPLETO / EAP (para reconstrução do zero por outra IA)
+================================================================================
+Pasta do repositório : C:\Users\franc\Projetos\AdBalanceBilling
+App (Next.js)        : C:\Users\franc\Projetos\AdBalanceBilling\web
+Gerado em            : 2026-06-26
+Idioma do produto    : Português do Brasil (pt-BR)
+
+--------------------------------------------------------------------------------
+0. COMO USAR ESTE DOCUMENTO
+--------------------------------------------------------------------------------
+Este arquivo descreve TUDO que foi construído: objetivo, decisões, stack,
+estrutura de pastas, banco de dados, design system, componentes, páginas, camada
+de serviços, integrações (Gemini, Slack, Tactiq), EAP (épicos/features/stories),
+bugs resolvidos, testes e passo-a-passo de setup.
+
+Objetivo: permitir reconstruir o sistema do zero mantendo o mesmo layout, design
+system, regras de negócio e integrações. Segredos (chaves) estão REDIGIDOS — os
+valores reais ficam apenas em web/.env.local (não versionado).
+
+================================================================================
+1. VISÃO GERAL DO PRODUTO
+================================================================================
+Nome do produto : "Call Intelligence — Sales Coaching IA"
+Pasta/projeto   : AdBalanceBilling (nome herdado da pasta; o produto é de análise
+                  de calls comerciais, NÃO de billing).
+
+O QUE É:
+Plataforma de Sales Coaching / Call Intelligence para times comerciais. O ativo
+central é a CALL do Closer (vendedor). O sistema transforma a transcrição bruta
+de uma call em:
+  - Análise estruturada por IA (notas por critério comercial + textos)
+  - Feedback final prático e acionável (não genérico)
+  - Diagnóstico de Causa Raiz comercial (skill "Prisma")
+  - Relatório Comercial da Oportunidade (visão do cliente + chance de venda)
+  - Resumo automático enviado ao Slack
+  - Dashboard de evolução do Closer ao longo do tempo
+
+Setor-alvo da skill comercial: MATERIAIS DE CONSTRUÇÃO (varejo/atacado,
+distribuidoras de ferro e aço, lojas físicas, distribuidores regionais).
+
+FLUXO PRINCIPAL:
+1. Recebe/importa a transcrição de uma call (manual, upload de arquivo, ou
+   webhook do Tactiq).
+2. IA (Google Gemini) analisa a call.
+3. IA identifica pontos fortes/fracos, oportunidades, próximos passos, causa raiz
+   e relatório comercial.
+4. Sistema gera resumo estruturado e salva tudo no banco.
+5. Sistema envia resumo no Slack (se configurado).
+6. Dashboard registra e mostra evolução.
+7. Feedback final com nota, observações e recomendações práticas.
+
+================================================================================
+2. DECISÕES DE STACK (tomadas com o usuário, com motivos)
+================================================================================
+- Stack base        : Next.js + Supabase (escolha do usuário). Full-stack num só
+                      app, deploy fácil na Vercel, rápido para MVP e escalável.
+- Provedor de IA    : Inicialmente OpenAI (GPT) -> DEPOIS TROCADO para Google
+                      Gemini (a pedido do usuário). Motivo da troca: usar modelo
+                      gratuito/leve (Gemini Flash) e custo baixo.
+- Entrada de call   : Transcrição em TEXTO no MVP (colar/anexar arquivo). Áudio/
+                      vídeo com transcrição automática = fase 2.
+- Slack             : Incoming Webhook (simples) no MVP.
+- Supabase          : Usuário usou conta própria (projeto novo) com credenciais
+                      manuais — NÃO criado via MCP.
+- Organização       : App Next.js dentro da subpasta /web; raiz do repo guarda
+                      git + supabase/ (migrations) + docs (separa app de infra).
+- Gráficos          : SVG próprio (LineChart/RadarChart/BarList) — evita conflito
+                      de peer-deps com React 19/Next 16 e mantém bundle leve.
+- Autenticação      : NÃO implementada no MVP. Todo acesso ao banco é server-side
+                      com service_role; RLS ligado sem políticas públicas.
+
+================================================================================
+3. STACK TÉCNICA E VERSÕES EXATAS
+================================================================================
+- Next.js 16.2.9 (App Router, Turbopack, React Server Components, Server Actions)
+    * IMPORTANTE: Next 16 tem breaking changes vs. treinos antigos.
+    * params e searchParams das páginas são Promise (precisa await).
+    * cookies()/headers() são async.
+    * Para não engolir notFound()/redirect() em try/catch, use
+      `unstable_rethrow(err)` de 'next/navigation' no catch.
+    * refresh()/revalidatePath()/revalidateTag() de 'next/cache'.
+    * Pastas com prefixo "_" são PRIVADAS (não viram rota). Ex.: /api/_diag NÃO
+      roteia; use /api/diag.
+    * Em <form action={serverAction}> NÃO defina encType — o React define
+      automaticamente (inclusive multipart com upload de arquivo). Definir manual
+      gera erro de console.
+- React 19.2.4 / react-dom 19.2.4
+- TypeScript ^5
+- Tailwind CSS v4 (@tailwindcss/postcss ^4)
+    * SEM tailwind.config. Configuração via CSS: `@import "tailwindcss";` +
+      bloco `@theme inline { ... }` em globals.css.
+- @supabase/supabase-js ^2.108 + @supabase/ssr ^0.12
+- Google Gemini API via HTTP REST (SEM SDK). Modelo: gemini-2.5-flash.
+- zod ^4.4 (validação da saída da IA)
+- lucide-react ^1.21 (ícones)
+- clsx ^2.1 + tailwind-merge ^3.6 (helper cn)
+- date-fns ^4.4 (instalado; uso mínimo)
+- Node 24.17, npm 11.13, Windows 11, shell PowerShell + Git Bash.
+- Deploy pretendido: Vercel.
+- OBS: a dependência "openai" foi instalada e DEPOIS removida na troca para Gemini.
+
+================================================================================
+4. ESTRUTURA DE PASTAS COMPLETA
+================================================================================
+AdBalanceBilling/                      (repo git — raiz)
+├── .git/
+├── .gitignore                         (ignora node_modules, .next, **/.env*.local)
+├── README.md                          (docs do produto + Tactiq + setup)
+├── CONTEXTO_PROJETO_EAP.txt           (este arquivo)
+├── supabase/
+│   ├── migrations/
+│   │   ├── 0001_init.sql              (schema base + RLS + triggers)
+│   │   ├── 0002_seed_criteria.sql     (12 critérios da rubrica)
+│   │   └── 0003_tactiq_webhook.sql    (status/origem Tactiq + webhook_logs)
+│   ├── schema.sql                     (0001+0002+0003 combinados, idempotente)
+│   └── seed.sql                       (2 closers + 1 call de exemplo, opcional)
+└── web/                               (aplicação Next.js)
+    ├── .env.local                     (segredos — NÃO versionado)
+    ├── .env.example                   (modelo EN)
+    ├── .env.local.example             (modelo PT)
+    ├── AGENTS.md / CLAUDE.md          (aviso: ler docs do Next 16 antes de codar)
+    ├── package.json (name: call-intelligence-web)
+    ├── next.config.ts / tsconfig.json / eslint.config.mjs / postcss.config.mjs
+    ├── public/                        (svgs default do scaffold)
+    └── src/
+        ├── app/
+        │   ├── layout.tsx             (RootLayout: html pt-BR, fontes Geist,
+        │   │                           Sidebar + MobileNav, main max-w-7xl,
+        │   │                           suppressHydrationWarning no <html>)
+        │   ├── globals.css            (tema/design tokens)
+        │   ├── page.tsx               (Dashboard)
+        │   ├── not-found.tsx          (404)
+        │   ├── closers/
+        │   │   ├── page.tsx           (lista + cadastro)
+        │   │   └── [id]/page.tsx      (perfil/evolução do Closer)
+        │   ├── calls/
+        │   │   ├── page.tsx           (lista + filtros)
+        │   │   ├── new/page.tsx       (nova call + upload de transcrição)
+        │   │   └── [id]/
+        │   │       ├── page.tsx       (análise individual da call)
+        │   │       └── feedback/page.tsx (feedback final + causa raiz)
+        │   ├── criteria/page.tsx      (rubrica de avaliação, read-only)
+        │   ├── settings/
+        │   │   ├── page.tsx           (status integrações + webhook Tactiq)
+        │   │   └── slack/page.tsx     (status Slack + teste + logs)
+        │   └── api/
+        │       └── webhooks/
+        │           └── tactiq/route.ts (POST webhook Tactiq)
+        ├── components/
+        │   ├── ui.tsx                 (kit de UI — ver seção Design System)
+        │   ├── sidebar.tsx            (Sidebar + MobileNav, 'use client')
+        │   ├── charts.tsx             (LineChart, RadarChart, BarList — SVG)
+        │   ├── pending-button.tsx     ('use client', useFormStatus)
+        │   ├── setup-banner.tsx       (aviso "banco não configurado")
+        │   ├── root-cause.tsx         (RootCausePanel — diagnóstico Prisma)
+        │   ├── commercial-report.tsx  (CommercialReportPanel)
+        │   └── copy-field.tsx         ('use client', botão copiar URL)
+        └── lib/
+            ├── utils.ts               (cn, fmtScore, scoreTone, fmtDate,
+            │                           initials, STATUS_LABELS, STATUS_TONE)
+            ├── types.ts               (todos os tipos de domínio)
+            ├── criteria.ts            (RUBRIC, labelFor, shortLabelFor, etc.)
+            ├── transcript.ts          (parser de arquivo de transcrição)
+            ├── supabase/admin.ts      (cliente server-side service_role)
+            ├── ai/
+            │   ├── config.ts          (GEMINI_MODEL, isAIEnabled, mensagens)
+            │   ├── schema.ts          (zod + responseSchema do Gemini)
+            │   ├── prompt.ts          (SYSTEM_PROMPT + buildUserPrompt)
+            │   ├── analyze.ts         (analyzeCall — chamada REST + retry)
+            │   └── skills/prisma-rca.ts (texto da skill comercial Prisma)
+            ├── slack/notify.ts        (Block Kit + envio)
+            ├── data/
+            │   ├── queries.ts         (leituras)
+            │   └── metrics.ts         (métricas de evolução)
+            └── actions/
+                ├── closers.ts         (createCloser, toggleCloserActive)
+                ├── calls.ts           (createCall, deleteCall, markReviewed)
+                ├── analysis.ts        (runAnalysis, notifySlack, etc.)
+                └── slack.ts           (sendTestSlack)
+
+================================================================================
+5. VARIÁVEIS DE AMBIENTE E CONEXÕES JÁ FEITAS
+================================================================================
+Arquivo: web/.env.local (NÃO versionado). Variáveis:
+
+  NEXT_PUBLIC_SUPABASE_URL      = https://anpfvjbjefsmkqratoeg.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = sb_publishable_********  (pública por design)
+  SUPABASE_SERVICE_ROLE_KEY     = [REDIGIDO — secreto, só backend, bypassa RLS]
+  GEMINI_API_KEY                = [REDIGIDO — chave Google AI Studio, prefixo AIza]
+  GEMINI_MODEL                  = gemini-2.5-flash
+  SLACK_WEBHOOK_URL             = (vazio — opcional; código pronto)
+  TACTIQ_WEBHOOK_SECRET         = (vazio — opcional; protege o webhook)
+  NEXT_PUBLIC_APP_URL           = http://localhost:3000
+
+CONEXÕES CONFIGURADAS/TESTADAS:
+- Supabase  : projeto ref "anpfvjbjefsmkqratoeg" (conta própria do usuário).
+              Migrations 0001, 0002 e 0003 APLICADAS no SQL Editor. RLS ligado;
+              acesso via service_role no servidor. CONECTADO e funcionando.
+- Gemini    : modelo gemini-2.5-flash. CONECTADO e testado (gera JSON estruturado).
+              Observação de cota: gemini-2.0-flash retornou "free_tier limit: 0"
+              nesse projeto; por isso usamos gemini-2.5-flash (tem cota free).
+- Slack     : NÃO configurado (webhook vazio). Código 100% pronto; basta a URL.
+- Tactiq    : Webhook POST /api/webhooks/tactiq construído e TESTADO ponta a ponta
+              (call salva, análise Gemini gerada, persistida, webhook_logs criado).
+- Onde obter as chaves:
+    Supabase service_role/anon -> Dashboard > Project Settings > API
+    Gemini -> https://aistudio.google.com/app/apikey (chave começa com "AIza")
+    Slack  -> https://api.slack.com/messaging/webhooks (começa com hooks.slack.com)
+
+REGRAS DE SEGREDO IMPORTANTES (aprendizados):
+- service_role e GEMINI_API_KEY são SECRETOS — nunca no client/commit.
+- A chave do Gemini começa com "AIza" (~39 chars). NÃO confundir com a da OpenAI
+  ("sk-..."). Colar a chave errada gera "API_KEY_INVALID".
+- Cuidado ao colar chaves: não deixar quebrar em 2 linhas no .env (aconteceu com
+  a service_role e teve que ser juntada numa linha só).
+
+================================================================================
+6. BANCO DE DADOS (Supabase / Postgres 17)
+================================================================================
+PRINCÍPIO DE DESIGN:
+- scores em tabela própria (1 linha por critério por análise) -> permite
+  comparação histórica e mudar a rubrica sem migração.
+- Cada análise guarda model + rubric_version -> notas comparáveis no tempo.
+- O JSON bruto da IA é salvo em call_analyses.raw (jsonb). Os blocos root_cause e
+  relatorio_comercial são lidos de raw (NÃO têm coluna própria).
+- RLS LIGADO em todas as tabelas, SEM políticas públicas. Browser nunca consulta
+  o banco direto; só o servidor (service_role, que bypassa RLS).
+
+ENUMS:
+  call_status     : recebida | pendente | em_analise | concluida | revisada |
+                    erro_na_analise
+  analysis_status : pendente | em_analise | concluida | falhou
+  action_status   : pendente | em_andamento | aplicada | descartada
+  call_source     : transcricao | link | audio | video | tactiq
+
+FUNÇÃO/TRIGGER:
+  set_updated_at() -> trigger BEFORE UPDATE que seta updated_at = now().
+  Aplicado em: closers, calls, call_analyses, improvement_actions.
+  (Use "create or replace trigger" para idempotência — Postgres 14+.)
+
+TABELAS (campo a campo):
+
+closers
+  id uuid PK default gen_random_uuid()
+  name text NOT NULL
+  email text
+  avatar_url text
+  role text default 'Closer'
+  active boolean NOT NULL default true
+  created_at timestamptz default now()
+  updated_at timestamptz default now()  (trigger)
+
+criteria   (rubrica de avaliação — reference data)
+  id uuid PK
+  key text UNIQUE NOT NULL          (ex.: 'diagnostico')
+  label text NOT NULL               (rótulo pt-BR)
+  description text                  (o que é "bom")
+  weight numeric(4,2) default 1.0
+  sort_order int default 0
+  active boolean default true
+  version int default 1
+  created_at timestamptz default now()
+
+calls
+  id uuid PK
+  closer_id uuid NOT NULL REFERENCES closers(id) ON DELETE CASCADE
+  client_name text NOT NULL         (cliente/lead)
+  call_date date NOT NULL default current_date
+  source call_source default 'transcricao'
+  recording_url text                (link da gravação)
+  transcript text                   (transcrição em texto)
+  status call_status default 'pendente'
+  duration_sec int
+  created_at / updated_at timestamptz (trigger)
+  índices: closer_id, call_date, status
+
+call_analyses
+  id uuid PK
+  call_id uuid NOT NULL REFERENCES calls(id) ON DELETE CASCADE
+  status analysis_status default 'pendente'
+  overall_score numeric(4,2)        (0..10)
+  summary text
+  closer_talk_pct int               (% fala do closer)
+  client_talk_pct int               (% fala do cliente)
+  model text                        (modelo de IA usado)
+  rubric_version int default 1
+  raw jsonb                         (payload completo da IA — inclui root_cause e
+                                     relatorio_comercial)
+  error text
+  created_at / updated_at timestamptz (trigger)
+  índice: call_id
+
+scores
+  id uuid PK
+  analysis_id uuid NOT NULL REFERENCES call_analyses(id) ON DELETE CASCADE
+  criterion_key text NOT NULL
+  score numeric(4,2) NOT NULL       (0..10)
+  justification text
+  created_at timestamptz
+  índices: analysis_id, criterion_key
+
+call_highlights   (momentos importantes)
+  id uuid PK
+  analysis_id uuid NOT NULL REFERENCES call_analyses(id) ON DELETE CASCADE
+  kind text default 'momento'       (dor|objecao|virada|risco|momento)
+  timestamp_ref text                (ex.: "12:30")
+  quote text
+  comment text
+  created_at timestamptz
+
+feedbacks
+  id uuid PK
+  analysis_id uuid NOT NULL REFERENCES call_analyses(id) ON DELETE CASCADE
+  strengths text[]                  (pontos fortes)
+  weaknesses text[]                 (pontos fracos)
+  keep_doing text[]                 (o que manter)
+  fix_doing text[]                  (o que corrigir)
+  final_comment text                (comentário final humano)
+  better_approach text              (como conduzir melhor, com exemplos)
+  created_at timestamptz
+
+improvement_actions
+  id uuid PK
+  analysis_id uuid NOT NULL REFERENCES call_analyses(id) ON DELETE CASCADE
+  closer_id uuid NOT NULL REFERENCES closers(id) ON DELETE CASCADE
+  title text NOT NULL
+  detail text
+  priority int default 2            (1 alta, 2 média, 3 baixa)
+  status action_status default 'pendente'  ('aplicada' alimenta "feedbacks aplicados")
+  created_at / updated_at timestamptz (trigger)
+  índices: closer_id, status
+
+slack_logs
+  id uuid PK
+  call_id uuid REFERENCES calls(id) ON DELETE SET NULL
+  channel text
+  payload jsonb
+  ok boolean default false
+  error text
+  created_at timestamptz
+
+webhook_logs   (migration 0003 — auditoria de webhooks recebidos)
+  id uuid PK
+  source text default 'tactiq'
+  call_id uuid REFERENCES calls(id) ON DELETE SET NULL
+  ok boolean default false
+  status text
+  error text
+  payload jsonb
+  created_at timestamptz
+  índices: source, call_id
+
+SEED DA RUBRICA (criteria) — 12 critérios (key | label | short | peso):
+  1  clareza_comunicacao   | Clareza na comunicação            | Clareza      | 1.0
+  2  dominio_processo      | Domínio do processo comercial     | Domínio      | 1.2
+  3  diagnostico           | Diagnóstico do cliente            | Diagnóstico  | 1.5
+  4  perguntas             | Capacidade de fazer perguntas     | Perguntas    | 1.2
+  5  identificacao_dores   | Identificação de dores            | Dores        | 1.5
+  6  conducao              | Condução da conversa              | Condução     | 1.3
+  7  quebra_objecoes       | Quebra de objeções                | Objeções     | 1.4
+  8  apresentacao_solucao  | Apresentação da solução           | Solução      | 1.3
+  9  criacao_valor         | Criação de valor                  | Valor        | 1.3
+  10 proximos_passos       | Próximos passos                   | Próx. passos | 1.1
+  11 fechamento            | Fechamento / tentativa de avanço  | Fechamento   | 1.4
+  12 postura               | Postura profissional              | Postura      | 1.0
+  (campo "short" usado nos gráficos; "label" nas listas. Nota geral = média
+   ponderada pelos pesos.)
+
+================================================================================
+7. DESIGN SYSTEM
+================================================================================
+ARQUIVO BASE: web/src/app/globals.css (Tailwind v4)
+
+TOKENS (CSS variables em :root e @theme inline):
+  --background : #f6f7fb  (cinza muito claro — fundo geral)
+  --foreground : #0f172a  (slate-900 — texto principal)
+  --card       : #ffffff  (cartões)
+  --border     : #e7e9f0  (bordas)
+  --muted      : #64748b  (slate-500 — texto secundário)
+  --brand      : #4f46e5  (indigo-600 — cor primária/ação)
+  Fontes: --font-geist-sans e --font-geist-mono (next/font/google: Geist, Geist_Mono)
+  Scrollbar fina customizada (#cbd2e0).
+
+PALETA SEMÂNTICA (Tailwind):
+  indigo  -> marca / ações primárias / links
+  slate   -> texto e neutros
+  emerald -> positivo / sucesso / nota alta
+  lime    -> bom (nota 6.5–8)
+  amber   -> atenção / médio (nota 5–6.5 / em análise / morno)
+  rose    -> negativo / erro / nota baixa (<5) / risco alto
+  sky     -> status "recebida" / temperatura "frio"
+  orange  -> temperatura "quente"
+
+TONS DE NOTA (utils.ts -> scoreTone, 0..10):
+  >= 8.0 : emerald  (Excelente)
+  >= 6.5 : lime     (Bom)
+  >= 5.0 : amber    (Regular)
+  <  5.0 : rose     (Atenção)
+  null   : slate    (Sem nota)
+
+STATUS (utils.ts -> STATUS_LABELS / STATUS_TONE):
+  recebida        -> "Recebida"        sky
+  pendente        -> "Pendente"        slate
+  em_analise      -> "Em análise"      amber
+  concluida       -> "Concluída"       emerald
+  revisada        -> "Revisada"        indigo
+  erro_na_analise -> "Erro na análise" rose
+  falhou          -> "Falhou"          rose
+
+FORMAS/ESPAÇAMENTO:
+  Cartões        : rounded-2xl, border border-border, bg-card, shadow-sm
+  Botões/inputs  : rounded-xl
+  Container main : mx-auto max-w-7xl, px-4/8, py-6/8
+  Badges/Pills   : rounded-full, px-2.5 py-0.5, text-xs, ring-1 ring-inset
+  Inputs         : border-slate-200, focus:border-indigo-400 + ring-indigo-100
+
+BOTÕES (variants em ui.tsx):
+  primary   : bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm
+  secondary : bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50
+  ghost     : text-slate-600 hover:bg-slate-100
+  danger    : bg-rose-600 text-white hover:bg-rose-700
+  Base: inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold
+
+LAYOUT GERAL:
+  - Sidebar fixa à esquerda (w-64, desktop), branca, com logo (ícone Sparkles em
+    quadrado indigo) + nav vertical; item ativo: bg-indigo-50 text-indigo-700.
+  - Em mobile: MobileNav horizontal rolável no topo.
+  - Conteúdo: main centralizado max-w-7xl.
+  Itens de nav: Dashboard (/), Closers (/closers), Calls (/calls),
+    Critérios (/criteria), Slack (/settings/slack), Configurações (/settings).
+  Ícones (lucide-react): LayoutDashboard, Users, PhoneCall, ListChecks,
+    MessageSquare (Slack), Settings, Sparkles.
+
+================================================================================
+8. COMPONENTES DE UI (web/src/components)
+================================================================================
+ui.tsx (server components, apresentacionais):
+  Card({className,children})           -> rounded-2xl border bg-card shadow-sm
+  CardBody({className,children})       -> p-5
+  SectionTitle({title,subtitle,action})
+  PageHeader({title,subtitle,action})  -> h1 2xl bold
+  StatusBadge({status})                -> usa STATUS_LABELS/TONE
+  ScoreBadge({score,size})             -> quadrado com nota; size sm/md/lg
+  Avatar({name,size})                  -> iniciais em círculo indigo
+  ScoreBar({score})                    -> barra 0..10 colorida por tom
+  StatCard({label,value,hint,trend,icon}) -> KPI; trend usa TrendPill
+  TrendPill({value})                   -> ▲/▼ + % (emerald/rose)
+  EmptyState({title,description,action})
+  ButtonLink({href,variant,children})  -> <Link> estilizado
+  SubmitButton({variant,children})     -> <button type=submit>
+  Pill({tone,children})                -> tones: emerald|rose|amber|indigo|slate
+
+sidebar.tsx ('use client'): Sidebar (desktop) + MobileNav; usePathname p/ ativo.
+charts.tsx (SVG puro, sem libs):
+  LineChart({points:[{label,value}],height}) -> evolução 0..10 com área/gradiente
+  RadarChart({data:[{label,value}]})          -> radar de critérios; viewBox com
+     padX=64 de margem p/ rótulos não cortarem; usa rótulos CURTOS (shortLabelFor)
+  BarList({items:[{label,value}]})            -> barras horizontais por critério
+pending-button.tsx ('use client'): PendingButton — useFormStatus, spinner Loader2,
+  desabilita enquanto pending (usado em ações longas como análise de IA).
+setup-banner.tsx: SetupBanner — aviso âmbar "Banco não configurado" + erro.
+root-cause.tsx: RootCausePanel({rc}) — painel do diagnóstico de causa raiz.
+commercial-report.tsx: CommercialReportPanel({report}) — relatório comercial.
+copy-field.tsx ('use client'): CopyField({value,label}) — code box + botão Copiar
+  (navigator.clipboard).
+
+================================================================================
+9. PÁGINAS / ROTAS
+================================================================================
+Todas as páginas de dados usam `export const dynamic = 'force-dynamic'` e
+envolvem o fetch em try/catch -> SetupBanner quando o banco não está pronto.
+Em páginas com notFound(), o catch chama unstable_rethrow(err) primeiro.
+
+/  (Dashboard) — page.tsx
+  KPIs: Closers ativos, Calls analisadas, Nota média do time (+trend %),
+        Critério a melhorar (menor média).
+  Ranking de Closers (média + evolução). BarList "Notas por critério" (time).
+  Lista de Calls recentes (até 6).
+
+/closers — lista + formulário de cadastro (createCloser). Mostra média e trend
+  por Closer.
+
+/closers/[id] — perfil/evolução:
+  KPIs (nota média + trend, calls analisadas, médias por critério, feedbacks
+  aplicados). LineChart de evolução. RadarChart de critérios. Pontos fortes/
+  fracos recorrentes. Comparativo recentes x anteriores. Lista das calls.
+
+/calls — lista com filtros (closer, status, período de/até via searchParams).
+
+/calls/new — formulário (createCall): Closer, data, cliente/lead, link, e
+  TRANSCRIÇÃO (upload de arquivo .txt/.md/.vtt/.srt OU colar texto) + checkbox
+  "Analisar com IA" (desabilitado em modo manual). PendingButton.
+
+/calls/[id] — análise individual:
+  Header com ScoreBadge, status, ações (Analisar/Reanalisar, Slack, Marcar
+  revisada, Ver feedback).
+  Se concluída: CommercialReportPanel (topo) + Resumo + Tempo de fala +
+  RadarChart + BarList + avaliação detalhada (justificativas) + highlights +
+  transcrição (collapsible). Em modo manual mostra "IA desativada".
+
+/calls/[id]/feedback — feedback final:
+  Comentário final (destaque) + RootCausePanel (causa raiz Prisma) + Manter/
+  Corrigir + Fortes/Fracos + "Como conduzir melhor" + avaliação por critérios +
+  Próximas ações (com botão "Aplicada" -> setActionStatus).
+
+/criteria — rubrica (read-only; lê do banco, fallback estático).
+
+/settings — status de integrações (Supabase URL/service_role, Gemini, Slack) +
+  card "Webhook do Tactiq" (CopyField com URL local e produção) + links úteis +
+  nota das migrations.
+
+/settings/slack — status do webhook + botão "Enviar teste" (sendTestSlack) +
+  histórico (slack_logs).
+
+/api/webhooks/tactiq — POST (e GET de cortesia). Ver seção 16.
+
+================================================================================
+10. CAMADA LIB — INVENTÁRIO DE FUNÇÕES
+================================================================================
+utils.ts
+  cn(...classes)                      -> clsx + tailwind-merge
+  fmtScore(score)                     -> "8.5" ou "—"
+  scoreTone(score)                    -> {text,bg,ring,label} por faixa
+  fmtDate(value)                      -> dd/mm/yyyy pt-BR
+  initials(name)                      -> "JS"
+  STATUS_LABELS, STATUS_TONE          -> mapas de status
+
+types.ts — tipos: CallStatus, AnalysisStatus, ActionStatus, CallSource,
+  Closer, Criterion, Call, CallAnalysis, Score, CallHighlight, Feedback,
+  ImprovementAction, SlackLog, CallWithCloser, FullAnalysis,
+  Nivel ('baixo'|'medio'|'alto'), EtapaFunil, RootCause,
+  MomentoCompra, TemperaturaLead, CommercialReport.
+
+criteria.ts
+  RUBRIC_VERSION = 1
+  RubricCriterion {key,label,short,description,weight}
+  RUBRIC[12], RUBRIC_BY_KEY
+  labelFor(key), shortLabelFor(key)
+  weightedOverall(scores) -> média ponderada 0..10
+
+transcript.ts
+  ACCEPTED_TRANSCRIPT_EXTS = ['.txt','.md','.vtt','.srt','.text']
+  MAX_TRANSCRIPT_BYTES = 2MB
+  parseTranscriptText(filename, raw) -> {ok,text,error}
+    * detecta binário (PDF/DOCX/áudio) e rejeita
+    * limpa timestamps/numeração de .vtt/.srt (cleanSubtitles)
+
+supabase/admin.ts
+  supabaseAdmin() -> SupabaseClient (prefere service_role, cai p/ anon)
+  hasServiceRole() -> boolean
+  ('server-only'; nunca importar em Client Component)
+
+ai/config.ts
+  GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+  isAIEnabled() -> Boolean(GEMINI_API_KEY)
+  AI_DISABLED_MESSAGE
+
+ai/schema.ts
+  Zod: aiScoreSchema, aiHighlightSchema, aiActionSchema, aiRootCauseSchema,
+       aiRelatorioComercialSchema, aiAnalysisSchema (raiz). Tipos inferidos.
+  aiAnalysisGeminiSchema -> JSON Schema p/ Gemini (tipos MAIÚSCULOS: OBJECT,
+       STRING, NUMBER, INTEGER, ARRAY; sem additionalProperties; usa enum,
+       nullable, required, propertyOrdering).
+
+ai/prompt.ts
+  SYSTEM_PROMPT = EVALUATOR_BASE + PRISMA_RCA_SKILL
+  buildUserPrompt({closerName,clientName,callDate,transcript}) -> tarefas 1..9.
+
+ai/analyze.ts
+  analyzeCall(input) -> {data,model}
+    * lê GEMINI_API_KEY; throw se vazia (modo manual)
+    * POST REST p/ generativelanguage.googleapis.com (header x-goog-api-key)
+    * generationConfig: temperature 0.3, responseMimeType application/json,
+      responseSchema aiAnalysisGeminiSchema
+    * RETRY: 429/503 com backoff (~2.5s,5s,7.5s, até 4 tentativas)
+    * valida com aiAnalysisSchema (Zod). Throw com mensagem clara em erro.
+
+slack/notify.ts
+  buildSlackBlocks(input) -> payload Block Kit (header, campos, resumo, bloco
+    COMERCIAL opcional [temperatura/probabilidade/risco/próximo passo],
+    positivos/melhoria/ações, botão "Ver análise completa")
+  sendSlackSummary(input) -> {ok,error,payload} (POST no SLACK_WEBHOOK_URL)
+  SlackCommercial {temperatura,probabilidade,proximoPasso,risco}
+
+data/queries.ts
+  listClosers, getCloser, listCriteria, listCalls(filters), getCall,
+  getLatestAnalysis, getFullAnalysis(callId) -> {call,closer,analysis,scores,
+  highlights,feedback,actions}
+
+data/metrics.ts
+  getDashboardMetrics() -> totais, teamAvg, teamEvolutionPct, byCloser,
+    criteriaAverages
+  getCloserEvolution(closerId) -> timeline, médias, recentVsPrevious, forças/
+    fraquezas
+  countAppliedActions(closerId) -> nº de ações "aplicada"
+  (evolução % = média das N recentes vs N anteriores)
+
+================================================================================
+11. SERVER ACTIONS (web/src/lib/actions) — 'use server'
+================================================================================
+closers.ts
+  createCloser(formData)        -> insert closer; revalida; redirect /closers
+  toggleCloserActive(formData)  -> ativa/desativa
+
+calls.ts
+  createCall(formData)          -> lê closer/cliente/data/link/transcrição;
+     se houver arquivo (transcript_file) lê via parseTranscriptText (prioridade
+     sobre texto colado); valida; insere call 'pendente'; se analyze_now &&
+     transcript && isAIEnabled() -> runAnalysis; redirect /calls/[id]
+  deleteCall(formData)
+  markReviewed(formData)        -> status 'revisada'
+
+analysis.ts  (ORQUESTRAÇÃO PRINCIPAL)
+  runAnalysis(callId) -> {ok,error?}
+     1. se !isAIEnabled() -> retorna ok:false (não mexe em status)
+     2. carrega call+closer; valida transcrição
+     3. status call 'em_analise'; apaga análises anteriores da call
+     4. cria call_analyses 'em_analise'
+     5. analyzeCall(...) -> persiste: call_analyses (overall_score, summary,
+        talk pcts, model, raw=ai), scores[], call_highlights[], feedbacks,
+        improvement_actions[]
+     6. status call 'concluida'
+     7. notifySlack(callId)
+     8. revalida páginas
+     em erro: call_analyses 'falhou'+error, call volta 'pendente'
+  analyzeCallAction(formData)   -> wrapper de runAnalysis p/ botão
+  notifySlack(callId)           -> monta resumo (inclui bloco comercial lido de
+     raw.relatorio_comercial) e envia; loga em slack_logs
+  resendSlackAction(formData)
+  setActionStatus(formData)     -> muda status de improvement_action
+
+slack.ts
+  sendTestSlack()               -> envia mensagem de teste e loga
+
+================================================================================
+12. INTEGRAÇÃO IA — GOOGLE GEMINI
+================================================================================
+- Endpoint REST:
+  POST https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent
+  Header: x-goog-api-key: <GEMINI_API_KEY>, Content-Type: application/json
+- Modelo: gemini-2.5-flash (leve/free; 2.0-flash tinha cota 0 nesse projeto).
+- Body:
+  {
+    system_instruction: { parts:[{text: SYSTEM_PROMPT}] },
+    contents: [{ role:'user', parts:[{text: userPrompt}] }],
+    generationConfig: {
+      temperature: 0.3,
+      responseMimeType: 'application/json',
+      responseSchema: <aiAnalysisGeminiSchema>
+    }
+  }
+- Saída: candidates[0].content.parts[*].text -> JSON -> validado por Zod.
+- Retry em 429 (cota) e 503 (sobrecarga) com backoff.
+- Modo manual: se GEMINI_API_KEY vazia, o sistema funciona sem IA (cadastros,
+  dashboard, Slack) e a análise fica desabilitada com aviso claro.
+
+ESTRUTURA COMPLETA DA SAÍDA DA IA (JSON):
+{
+  summary: string,
+  overall_score: number(0..10),
+  closer_talk_pct: int(0..100),
+  client_talk_pct: int(0..100),
+  scores: [ { criterion_key (um dos 12), score(0..10), justification } ],  // 12 itens
+  highlights: [ { kind(dor|objecao|virada|risco|momento), timestamp_ref|null,
+                  quote, comment } ],
+  feedback: { strengths[], weaknesses[], keep_doing[], fix_doing[],
+              final_comment, better_approach },
+  actions: [ { title, detail, priority(1..3) } ],
+  root_cause: {                                  // skill Prisma (seção 13)
+     diagnostico_direto, sintoma, causa_aparente, causa_raiz,
+     causas_secundarias[], categorias_causa[],
+     gravidade(baixo|medio|alto), confianca(baixo|medio|alto),
+     etapa_quebrou(anuncio|lead|whatsapp|ligacao|qualificacao|reuniao|proposta|
+                   objecao|follow_up|decisao),
+     o_que_deveria_ter_acontecido, como_corrigir_agora, como_prevenir,
+     mensagem_recomendada, proximo_passo
+  },
+  relatorio_comercial: {                         // seção 14
+     contexto_do_cliente, resumo_da_reuniao,
+     momento_de_compra(apenas_pesquisando|comparando_preco|pediu_orcamento|
+        demonstrou_interesse_real|perto_do_fechamento|pronto_para_fechar|
+        nao_identificado),
+     temperatura_do_lead(frio|morno|quente|muito_quente),
+     probabilidade_estimada_de_fechamento(int 0..100),
+     probabilidade_justificativa,
+     sinais_de_compra[], objecoes_ou_travas[],
+     proximo_passo_ideal,
+     risco_de_perda(baixo|medio|alto), risco_de_perda_motivo,
+     diagnostico_comercial_final
+  }
+}
+
+================================================================================
+13. SKILL COMERCIAL "PRISMA" (Análise de Causa Raiz)
+================================================================================
+Arquivo: web/src/lib/ai/skills/prisma-rca.ts (constante PRISMA_RCA_SKILL,
+injetada no SYSTEM_PROMPT). Persona: diretor comercial sênior, causa raiz para
+o setor de MATERIAIS DE CONSTRUÇÃO. Pontos-chave do conteúdo:
+
+- Contexto/ICP: varejo/atacado de materiais, ferro e aço, lojas físicas,
+  distribuidores. ICP = empresa com operação real (loja, equipe, estoque,
+  região, potencial). NÃO ICP = prestador, construtora, autônomo, MEI sem
+  estrutura. Objetivo: anúncios -> demanda qualificada -> REUNIÃO. WhatsApp NÃO
+  fecha venda, NÃO passa preço, NÃO explica tudo — serve para avançar p/ reunião.
+- Ciclo: anúncio -> lead -> 1º contato -> qualificação -> agendamento ->
+  confirmação -> diagnóstico -> valor -> solução -> objeções -> avanço ->
+  fechamento/follow-up.
+- Comunicação firme/madura. EVITAR frases fracas ("só passando pra ver", "tem
+  interesse?", "qualquer coisa me chama", "fico à disposição", "sem compromisso",
+  "talvez", "acho que"). PREFERIR ("O ponto é o seguinte", "Faz sentido
+  alinharmos numa reunião", "O melhor próximo passo é").
+- Straight Line Selling: 3 certezas (solução, vendedor, empresa); avaliar qual
+  faltou; ver se conduziu em linha reta ou abriu desvios.
+- SPIN: Situação, Problema, Implicação, Necessidade. Dor só citada = decisão
+  fraca; dor AMPLIADA = urgência.
+- Objeções: resistência (não rejeição). Estrutura: reconhecer -> validar ->
+  isolar -> real ou fuga -> retomar valor -> reduzir risco -> microcompromisso ->
+  avançar. Tipos: prospecção, red herrings, microcompromisso, compra.
+- 20 categorias de causa: ICP, canal, anúncio, oferta, posicionamento, abordagem,
+  tempo de resposta, qualificação, WhatsApp, ligação, reunião, construção de
+  valor, confiança, autoridade, urgência, preço, follow-up, processo, emocional,
+  estratégica.
+- Regras: não inventar dados; nada genérico; não culpar só lead nem só vendedor;
+  buscar causa mais CONTROLÁVEL; não sugerir desconto/preço no WhatsApp/explicação
+  longa/insistência vazia; follow-up sempre com contexto+motivo+direção.
+- Lógica: sem diagnóstico não há venda consultiva; sem dor não há urgência; sem
+  autoridade não há decisão; sem confiança não há avanço; sem microcompromisso o
+  pipeline trava; sem próximo passo o lead esfria; sem controle o lead conduz;
+  sem valor o preço vira objeção; sem processo o comercial depende de sorte.
+- Saída: separa sintoma/causa aparente/causa raiz; aponta etapa que quebrou,
+  comportamento ideal, correção imediata, prevenção, e (quando faz sentido) uma
+  mensagem/fala pronta no tom firme; termina com próximo passo objetivo.
+
+RENDERIZAÇÃO: RootCausePanel (na página de feedback). Badges de gravidade/
+confiança/etapa; diagnóstico direto em destaque; sintoma->aparente->raiz; causas
+secundárias + categorias; correção (deveria/corrigir/prevenir); mensagem
+recomendada; próximo passo.
+
+================================================================================
+14. RELATÓRIO COMERCIAL DA OPORTUNIDADE
+================================================================================
+Objetivo: analisar a call também pelo lado do CLIENTE e da CHANCE de venda.
+Regras: basear-se só na transcrição; usar "não identificado na conversa" quando
+faltar; NÃO inventar empresa/produto/valor/intenção; probabilidade é estimativa.
+Campos: ver seção 12 (relatorio_comercial).
+RENDERIZAÇÃO: CommercialReportPanel (topo da página da call):
+  - badges: temperatura (emoji), momento de compra, risco de perda
+  - gauge de probabilidade (0..100) com cor (>=70 verde, >=40 âmbar, senão rose)
+  - contexto do cliente + resumo da reunião
+  - sinais de compra (pills verdes) x objeções/travas (pills rose)
+  - diagnóstico comercial final (caixa escura) + próximo passo ideal
+
+================================================================================
+15. INTEGRAÇÃO SLACK (Incoming Webhook + Block Kit)
+================================================================================
+- Disparado automaticamente ao fim da análise (notifySlack) e via teste manual
+  na tela /settings/slack. Sempre logado em slack_logs.
+- Mensagem (Block Kit): header com nome do Closer; campos (cliente, data, nota
+  geral com emoji, closer); resumo; BLOCO COMERCIAL (se houver): 🌡️ temperatura,
+  📈 prob. fechamento, ⚠️ risco de perda, ➡️ próximo passo; positivos; melhorias;
+  ações; botão "Ver análise completa" (link = NEXT_PUBLIC_APP_URL + /calls/[id]).
+- Sem SLACK_WEBHOOK_URL: envio retorna erro amigável e é logado (não quebra fluxo).
+
+================================================================================
+16. INTEGRAÇÃO TACTIQ (Webhook)
+================================================================================
+Rota: POST /api/webhooks/tactiq  (web/src/app/api/webhooks/tactiq/route.ts)
+URL local      : http://localhost:3000/api/webhooks/tactiq
+URL produção   : NEXT_PUBLIC_APP_URL + /api/webhooks/tactiq
+Tela           : Configurações -> card "Webhook do Tactiq" (CopyField).
+
+Payload (JSON):
+  titulo_da_call, data_da_call, closer, cliente, empresa, link_da_reuniao,
+  transcricao (OBRIGATÓRIO, >=40 chars), participantes (string|array),
+  origem ("tactiq")
+
+Fluxo:
+  1. (Opcional) Segredo: se TACTIQ_WEBHOOK_SECRET setado, exige header
+     x-webhook-secret (ou ?secret=); senão 401.
+  2. Valida transcrição (400 amigável se faltar).
+  3. Resolve closer pelo nome (ilike) ou cria; sem nome -> "Não informado".
+  4. client_name = "cliente — empresa"; prepende contexto (título/empresa/
+     participantes) à transcrição p/ enriquecer a análise.
+  5. Insere call: source 'tactiq', status 'recebida'. Loga em webhook_logs (ok).
+  6. Se !isAIEnabled() -> mantém 'recebida' e retorna (modo manual).
+  7. runAnalysis(callId): salva análise + Slack.
+  8. Se análise falhar -> call status 'erro_na_analise' + webhook_logs(error).
+  Respostas: 200 {ok,call_id,status,message} | 400 validação | 401 segredo |
+             500 erro ao salvar.
+  GET de cortesia retorna info do serviço.
+
+Conectar Tactiq -> usar Zapier ou Make como ponte:
+  Zapier: Trigger Tactiq "New Meeting Transcript" -> Action "Webhooks by Zapier"
+    POST (JSON) para a URL; mapear campos; header x-webhook-secret se usar segredo.
+  Make: módulo Tactiq -> HTTP POST (Raw/JSON) p/ a URL.
+  Em dev local, expor com túnel (ex.: ngrok) para o Zapier/Make alcançarem.
+
+TESTE REALIZADO (ponta a ponta, OK):
+  POST real -> call salva (source tactiq, status concluida) -> análise Gemini
+  (gemini-2.5-flash, 12 notas, feedback, root_cause, relatorio_comercial) ->
+  webhook_logs criado (ok, 'recebida') -> sem erros no terminal.
+
+================================================================================
+17. EAP — ÉPICOS / FEATURES / USER STORIES
+================================================================================
+ÉPICO 1 — Cadastro e organização de calls
+  F1.1 Cadastrar Closers            US: como gestor, cadastro Closers (nome,
+                                        email, cargo) p/ vincular calls.
+  F1.2 Cadastrar Calls              US: cadastro call com Closer, data, cliente,
+                                        link e transcrição (colar OU upload).
+  F1.3 Upload de transcrição        US: anexo .txt/.md/.vtt/.srt; .vtt/.srt têm
+                                        timestamps removidos; binário rejeitado.
+  F1.4 Status da call               recebida/pendente/em_analise/concluida/
+                                        revisada/erro_na_analise.
+  F1.5 Filtros de calls             por closer, status, período.
+
+ÉPICO 2 — Análise por IA
+  F2.1 Análise com Gemini (Flash) saída estruturada validada por Zod.
+  F2.2 Rubrica de 12 critérios     nota 0..10 + justificativa por critério.
+  F2.3 Resumo, tempo de fala, highlights (dor/objeção/virada/risco).
+  F2.4 Skill Causa Raiz (Prisma).
+  F2.5 Relatório Comercial da Oportunidade.
+  F2.6 Modo manual (sem GEMINI_API_KEY) sem quebrar o app.
+  F2.7 Retry automático em 429/503.
+
+ÉPICO 3 — Feedback final
+  F3.1 Comentário final humano e direto.
+  F3.2 Manter / Corrigir / Fortes / Fracos.
+  F3.3 "Como conduzir melhor" com exemplos de fala.
+  F3.4 Próximas ações (priorizadas) com marcação "Aplicada".
+
+ÉPICO 4 — Dashboard de evolução
+  F4.1 KPIs do time (closers, calls, nota média, trend).
+  F4.2 Ranking de Closers.
+  F4.3 Perfil do Closer: evolução (LineChart), radar, médias por critério,
+       recorrências, comparativo recentes x anteriores, feedbacks aplicados.
+
+ÉPICO 5 — Integração Slack
+  F5.1 Resumo automático pós-análise (Block Kit) + bloco comercial.
+  F5.2 Tela de teste + histórico (slack_logs).
+
+ÉPICO 6 — Integração Tactiq (webhook)
+  F6.1 Receber call transcrita automaticamente.
+  F6.2 Salvar + disparar análise + Slack.
+  F6.3 Logs/erros (webhook_logs), status 'recebida'/'erro_na_analise'.
+  F6.4 Segredo opcional. F6.5 Tela com URL p/ copiar. F6.6 Docs Zapier/Make.
+
+ÉPICO 7 — Configurações / Critérios
+  F7.1 Status das integrações. F7.2 Rubrica visível (critérios + pesos).
+
+ÉPICO 8 — Infra/qualidade
+  F8.1 RLS + acesso só via service_role. F8.2 SetupBanner quando banco off.
+  F8.3 Build verde (tsc + next build). F8.4 Backup/versionamento.
+
+================================================================================
+18. BUGS / PROBLEMAS RESOLVIDOS (histórico + causa + solução)
+================================================================================
+B01 create-next-app falhou: nome de pacote não pode ter maiúsculas
+    (AdBalanceBilling). -> Scaffold em pasta temporária minúscula e mover.
+B02 Pasta temp "_abb_tmp": nome npm não pode começar com "_". -> usar "abbtmp".
+B03 mover node_modules deu "permission denied" (lock Windows). -> retry moveu.
+B04 Reorganização: app foi para subpasta /web (pedido do usuário).
+B05 Supabase create_project rejeitado (usuário queria OUTRA conta). -> usar
+    credenciais manuais da conta do usuário.
+B06 service_role colada quebrada em 2 linhas no .env -> juntar numa linha.
+B07 lucide-react não exporta ícone "Slack" nessa versão -> usar MessageSquare.
+B08 TS: conversão Record->Call exige `as unknown as Call`.
+B09 notFound() sendo engolido por try/catch -> usar unstable_rethrow(err).
+B10 Gemini "API_KEY_INVALID": chave colada era da OpenAI (sk-...). -> usar chave
+    Google AI Studio (AIza...).
+B11 Gemini 429 "free_tier limit: 0" no gemini-2.0-flash. -> trocar para
+    gemini-2.5-flash (tem cota free nesse projeto).
+B12 Gemini 503 "model overloaded" (transitório). -> retry com backoff (4x).
+B13 <form action={serverAction} encType=...> erro de console. -> remover encType
+    (React define automático; upload de File funciona mesmo assim).
+B14 Rótulos do RadarChart cortados/clipados. -> rótulos curtos (shortLabelFor) +
+    viewBox com margem (padX).
+B15 Rota /api/_diag não roteava (pasta "_" é privada no App Router). -> /api/diag.
+B16 Webhook Tactiq: callId tipo string|null no TS. -> guarda `if (!callId) ...`.
+B17 Webhook Tactiq: enum sem 'tactiq'/'recebida'. -> migration 0003.
+B18 Aviso de hydration ("A tree hydrated but some attributes... didn't match").
+    Causa: extensão LanguageTool injeta data-lt-installed no <html>. -> adicionar
+    suppressHydrationWarning na tag <html> do layout.tsx (recomendado pelo Next).
+
+================================================================================
+19. TESTES REALIZADOS
+================================================================================
+- tsc --noEmit: PASS em todas as etapas.
+- next build: PASS (todas as rotas compilam).
+- Dev server: todas as rotas retornam 200; sem erros no log.
+- Gemini (rota temporária de diagnóstico, depois removida): saída estruturada
+  válida incluindo root_cause e relatorio_comercial; classificações coerentes
+  (ex.: call ruim -> nota ~2.5, momento "apenas_pesquisando", risco "alto").
+- Tactiq webhook: validações (sem transcrição -> 400; corpo inválido -> 400) e
+  fluxo completo (POST real -> salva -> analisa -> persiste -> webhook_logs) OK.
+
+================================================================================
+20. ESCOPO MVP E ROADMAP
+================================================================================
+DENTRO DO MVP:
+  Cadastro Closer/Call (texto ou upload), análise IA estruturada, feedback,
+  causa raiz, relatório comercial, Slack webhook, dashboard de evolução,
+  webhook Tactiq.
+FASE 2+ (roadmap):
+  Transcrição automática de áudio/vídeo + diarização (Whisper/Deepgram);
+  Slack App/Bot interativo; Autenticação (Supabase Auth) + papéis + RLS por
+  usuário; Editor de rubrica na UI (pesos/critérios versionados); Importação
+  automática Zoom/Meet/Drive; Processamento assíncrono via fila p/ calls longas;
+  Dashboard comercial agregado (pipeline por temperatura, soma de probabilidade).
+
+================================================================================
+21. SETUP DO ZERO (passo a passo p/ a próxima IA)
+================================================================================
+1. Criar app: estrutura web/ com Next.js 16 (App Router, TS, Tailwind v4,
+   src-dir, import alias @/*). Manter app dentro de /web; git na raiz.
+2. Instalar deps: @supabase/supabase-js @supabase/ssr zod clsx tailwind-merge
+   lucide-react date-fns. (NÃO usar SDK da OpenAI nem do Gemini — usar fetch REST.)
+3. Recriar globals.css com os tokens da seção 6 e fontes Geist.
+4. Banco: rodar supabase/schema.sql (0001+0002+0003) no SQL Editor do Supabase.
+5. Criar web/.env.local com as variáveis da seção 5 (preencher as chaves reais).
+6. Recriar lib/ (utils, types, criteria, transcript, supabase/admin, ai/*, slack,
+   data/*, actions/*) conforme seções 10–16.
+7. Recriar components/ (ui, sidebar, charts SVG, pending-button, setup-banner,
+   root-cause, commercial-report, copy-field) conforme seções 7–8.
+8. Recriar páginas conforme seção 9 (force-dynamic + try/catch + SetupBanner;
+   unstable_rethrow no catch de páginas com notFound).
+9. Recriar rota /api/webhooks/tactiq conforme seção 16.
+10. Validar: npx tsc --noEmit && npm run build. Subir: npm run dev.
+LEMBRETES NEXT 16: params/searchParams são Promise; pastas "_" não roteiam; não
+setar encType em form de Server Action; ler node_modules/next/dist/docs antes.
+
+================================================================================
+22. GIT E BACKUPS (estado atual)
+================================================================================
+- Repo git na raiz (AdBalanceBilling). .env.local ignorado (segredos fora do git).
+- Commits:
+    de41b02  Initial commit: Call Intelligence (MVP completo)
+    4451d13  Integração Tactiq: webhook POST /api/webhooks/tactiq
+  (Correção de hydration + este arquivo de contexto: a versionar.)
+- Backup local (sem node_modules/.next, com .git e .env.local):
+    Pasta: C:\Users\franc\Projetos\_backups\AdBalanceBilling_2026-06-25_2145\
+    Zip  : C:\Users\franc\Projetos\_backups\AdBalanceBilling_2026-06-25_2145.zip
+- Recomendado: criar repositório remoto privado (GitHub) e dar push (backup fora
+  da máquina).
+
+================================================================================
+FIM DO ARQUIVO DE CONTEXTO
+================================================================================

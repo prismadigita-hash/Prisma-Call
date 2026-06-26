@@ -240,13 +240,15 @@ export function SubmitButton({
   variant = 'primary',
   className,
   children,
+  formAction,
 }: {
   variant?: keyof typeof btnVariants
   className?: string
   children: ReactNode
+  formAction?: (formData: FormData) => void | Promise<void>
 }) {
   return (
-    <button type="submit" className={cn(btnBase, btnVariants[variant], className)}>
+    <button type="submit" formAction={formAction} className={cn(btnBase, btnVariants[variant], className)}>
       {children}
     </button>
   )
