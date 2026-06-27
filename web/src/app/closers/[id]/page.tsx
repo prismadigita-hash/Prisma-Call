@@ -40,7 +40,7 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
 
     return (
       <>
-        <Link href="/closers" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
+        <Link href="/closers" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200 dark:hover:text-white">
           <ArrowLeft size={15} /> Closers
         </Link>
 
@@ -160,7 +160,7 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
             <Card>
               <div className="divide-y divide-border">
                 {calls.map((call) => (
-                  <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:bg-slate-800/60">
+                  <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:hover:bg-slate-800">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{call.client_name}</p>
                       <p className="text-xs text-slate-400">{fmtDate(call.call_date)}</p>

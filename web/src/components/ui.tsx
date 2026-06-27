@@ -163,7 +163,7 @@ export function StatCard({
             {hint && <span className="text-xs text-slate-400">{hint}</span>}
           </div>
         </div>
-        {icon && <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600">{icon}</div>}
+        {icon && <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">{icon}</div>}
       </CardBody>
     </Card>
   )
@@ -212,9 +212,9 @@ export function EmptyState({
 const btnBase =
   'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-50'
 const btnVariants = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm',
-  secondary: 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:bg-slate-800/60',
-  ghost: 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:bg-slate-800',
+  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm dark:shadow-[0_0_22px_-6px_rgba(99,102,241,0.65)]',
+  secondary: 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800',
+  ghost: 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
   danger: 'bg-rose-600 text-white hover:bg-rose-700',
 }
 

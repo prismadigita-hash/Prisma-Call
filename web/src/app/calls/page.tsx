@@ -63,7 +63,7 @@ export default async function CallsPage({
               <button type="submit" className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
                 Filtrar
               </button>
-              <Link href="/calls" className="px-2 py-2 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">Limpar</Link>
+              <Link href="/calls" className="px-2 py-2 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200 dark:hover:text-white">Limpar</Link>
             </form>
           </CardBody>
         </Card>
@@ -78,7 +78,7 @@ export default async function CallsPage({
           <Card>
             <div className="divide-y divide-border">
               {calls.map((call) => (
-                <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 dark:bg-slate-800/60">
+                <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <Avatar name={call.closer?.name ?? '?'} size={36} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{call.client_name}</p>

@@ -32,7 +32,7 @@ export default async function ClosersPage() {
                     {closers.map((c) => {
                       const m = metrics.byCloser[c.id]
                       return (
-                        <Link key={c.id} href={`/closers/${c.id}`} className="flex items-center gap-4 py-3 hover:bg-slate-50 dark:bg-slate-800/60">
+                        <Link key={c.id} href={`/closers/${c.id}`} className="flex items-center gap-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800">
                           <Avatar name={c.name} />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{c.name}</p>

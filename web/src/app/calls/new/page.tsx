@@ -30,7 +30,7 @@ export default async function NewCallPage() {
 
   return (
     <>
-      <Link href="/calls" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
+      <Link href="/calls" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200 dark:hover:text-white">
         <ArrowLeft size={15} /> Calls
       </Link>
       <PageHeader title="Nova call" subtitle="Cadastre uma call e gere a análise por IA" />
@@ -112,7 +112,7 @@ export default async function NewCallPage() {
 
               <div className="flex items-center gap-3 pt-1">
                 <PendingButton pendingText={aiEnabled ? 'Salvando e analisando…' : 'Salvando…'}>Salvar call</PendingButton>
-                <Link href="/calls" className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">Cancelar</Link>
+                <Link href="/calls" className="text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200 dark:hover:text-white">Cancelar</Link>
               </div>
             </form>
           </CardBody>

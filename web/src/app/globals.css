@@ -13,11 +13,11 @@
 }
 
 .dark {
-  --background: #0a0f1c;
-  --foreground: #e6edf6;
-  --card: #0f172a;
-  --border: #1e293b;
-  --muted: #94a3b8;
+  --background: #070b16;
+  --foreground: #e8eef9;
+  --card: #0e1626;
+  --border: #1d2940;
+  --muted: #93a1bd;
   --brand: #6366f1;
 }
 
@@ -37,6 +37,31 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Polimento futurista do modo escuro: brilho sutil de fundo (aurora) */
+.dark body {
+  background:
+    radial-gradient(1000px 560px at 82% -8%, rgba(99, 102, 241, 0.12), transparent 60%),
+    radial-gradient(760px 520px at 0% 108%, rgba(56, 189, 248, 0.07), transparent 55%),
+    var(--background);
+  background-attachment: fixed;
+}
+
+/* Transições suaves nos elementos interativos */
+a,
+button {
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.32);
+  color: #fff;
 }
 
 ::-webkit-scrollbar {

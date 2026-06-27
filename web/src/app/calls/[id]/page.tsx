@@ -53,7 +53,7 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
 
     return (
       <>
-        <Link href="/calls" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
+        <Link href="/calls" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200 dark:hover:text-white">
           <ArrowLeft size={15} /> Calls
         </Link>
 

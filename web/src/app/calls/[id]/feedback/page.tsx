@@ -174,7 +174,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
 
 function Backlink({ id }: { id: string }) {
   return (
-    <Link href={`/calls/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
+    <Link href={`/calls/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200 dark:hover:text-white">
       <ArrowLeft size={15} /> Voltar para a call
     </Link>
   )
