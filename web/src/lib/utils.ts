@@ -20,7 +20,7 @@ export function scoreTone(score: number | null | undefined): {
   label: string
 } {
   if (score === null || score === undefined) {
-    return { text: 'text-slate-400', bg: 'bg-slate-100', ring: 'ring-slate-200', label: 'Sem nota' }
+    return { text: 'text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800', ring: 'ring-slate-200 dark:ring-slate-700', label: 'Sem nota' }
   }
   const s = Number(score)
   if (s >= 8) return { text: 'text-emerald-700', bg: 'bg-emerald-50', ring: 'ring-emerald-200', label: 'Excelente' }
@@ -59,7 +59,7 @@ export const STATUS_LABELS: Record<string, string> = {
 
 export const STATUS_TONE: Record<string, string> = {
   recebida: 'bg-sky-50 text-sky-700 ring-sky-200',
-  pendente: 'bg-slate-100 text-slate-600 ring-slate-200',
+  pendente: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-slate-200 dark:ring-slate-700',
   em_analise: 'bg-amber-50 text-amber-700 ring-amber-200',
   concluida: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
   revisada: 'bg-indigo-50 text-indigo-700 ring-indigo-200',

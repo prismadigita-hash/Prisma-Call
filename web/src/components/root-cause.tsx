@@ -30,14 +30,14 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
       <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
         {icon} {title}
       </p>
-      <p className="text-sm leading-relaxed text-slate-700">{children}</p>
+      <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{children}</p>
     </div>
   )
 }
 
 export function RootCausePanel({ rc }: { rc: RootCause }) {
   return (
-    <Card className="border-slate-200">
+    <Card className="border-slate-200 dark:border-slate-700">
       <CardBody>
         {/* Header */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -46,7 +46,7 @@ export function RootCausePanel({ rc }: { rc: RootCause }) {
               <Crosshair size={18} />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Diagnóstico de Causa Raiz</h3>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Diagnóstico de Causa Raiz</h3>
               <p className="text-xs text-slate-400">Método Prisma · análise consultiva</p>
             </div>
           </div>
@@ -83,7 +83,7 @@ export function RootCausePanel({ rc }: { rc: RootCause }) {
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">Causas secundárias</p>
                 <ul className="space-y-1">
                   {rc.causas_secundarias.map((c, i) => (
-                    <li key={i} className="flex gap-2 text-sm text-slate-700">
+                    <li key={i} className="flex gap-2 text-sm text-slate-700 dark:text-slate-300">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300" />
                       {c}
                     </li>
@@ -123,7 +123,7 @@ export function RootCausePanel({ rc }: { rc: RootCause }) {
             <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-600">
               <MessageSquare size={13} /> Mensagem / fala recomendada
             </p>
-            <p className="whitespace-pre-line text-sm italic leading-relaxed text-slate-800">“{rc.mensagem_recomendada}”</p>
+            <p className="whitespace-pre-line text-sm italic leading-relaxed text-slate-800 dark:text-slate-200">“{rc.mensagem_recomendada}”</p>
           </div>
         )}
 

@@ -9,7 +9,7 @@ import { createCloser } from '@/lib/actions/closers'
 export const dynamic = 'force-dynamic'
 
 const inputCls =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100'
+  'w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100'
 
 export default async function ClosersPage() {
   try {
@@ -32,10 +32,10 @@ export default async function ClosersPage() {
                     {closers.map((c) => {
                       const m = metrics.byCloser[c.id]
                       return (
-                        <Link key={c.id} href={`/closers/${c.id}`} className="flex items-center gap-4 py-3 hover:bg-slate-50">
+                        <Link key={c.id} href={`/closers/${c.id}`} className="flex items-center gap-4 py-3 hover:bg-slate-50 dark:bg-slate-800/60">
                           <Avatar name={c.name} />
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-slate-900">{c.name}</p>
+                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{c.name}</p>
                             <p className="text-xs text-slate-400">{c.role ?? 'Closer'} · {m?.callsAnalyzed ?? 0} calls</p>
                           </div>
                           <div className="w-40">
@@ -58,15 +58,15 @@ export default async function ClosersPage() {
                 <SectionTitle title="Novo Closer" />
                 <form action={createCloser} className="space-y-3">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">Nome *</label>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Nome *</label>
                     <input name="name" required className={inputCls} placeholder="Ex: João Silva" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">E-mail</label>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">E-mail</label>
                     <input name="email" type="email" className={inputCls} placeholder="joao@empresa.com" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">Cargo</label>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Cargo</label>
                     <input name="role" className={inputCls} placeholder="Closer" defaultValue="Closer" />
                   </div>
                   <SubmitButton className="w-full">

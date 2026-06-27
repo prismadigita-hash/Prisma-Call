@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound, unstable_rethrow } from 'next/navigation'
-import { ArrowLeft, Sparkles, Send, CheckCircle2, FileText, Clock, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Sparkles, CheckCircle2, FileText, Clock, AlertCircle } from 'lucide-react'
 import {
   PageHeader,
   Card,
@@ -21,7 +21,7 @@ import type { CommercialReport } from '@/lib/types'
 import { getFullAnalysis } from '@/lib/data/queries'
 import { isAIEnabled } from '@/lib/ai/config'
 import { labelFor, shortLabelFor } from '@/lib/criteria'
-import { analyzeCallAction, resendSlackAction } from '@/lib/actions/analysis'
+import { analyzeCallAction } from '@/lib/actions/analysis'
 import { markReviewed } from '@/lib/actions/calls'
 import { fmtScore, fmtDate } from '@/lib/utils'
 
@@ -53,7 +53,7 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
 
     return (
       <>
-        <Link href="/calls" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+        <Link href="/calls" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
           <ArrowLeft size={15} /> Calls
         </Link>
 
@@ -63,7 +63,7 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
             <ScoreBadge score={analysis?.overall_score} size="lg" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h1 className="truncate text-xl font-bold text-slate-900">{call.client_name}</h1>
+                <h1 className="truncate text-xl font-bold text-slate-900 dark:text-slate-100">{call.client_name}</h1>
                 <StatusBadge status={call.status} />
               </div>
               <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-500">
@@ -92,12 +92,6 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
                 </form>
               ) : (
                 !hasAnalysis && <Pill tone="amber">IA desativada — modo manual</Pill>
-              )}
-              {hasAnalysis && (
-                <form action={resendSlackAction}>
-                  <input type="hidden" name="id" value={call.id} />
-                  <PendingButton variant="secondary" pendingText="Enviando…"><Send size={16} /> Slack</PendingButton>
-                </form>
               )}
               {hasAnalysis && call.status !== 'revisada' && (
                 <form action={markReviewed}>
@@ -143,7 +137,7 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
               <Card className="lg:col-span-2">
                 <CardBody>
                   <SectionTitle title="Resumo da call" />
-                  <p className="text-sm leading-relaxed text-slate-700">{analysis.summary}</p>
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{analysis.summary}</p>
                 </CardBody>
               </Card>
               <Card>
@@ -181,8 +175,8 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
                       <div key={s.id} className="flex gap-4 py-3">
                         <ScoreBadge score={Number(s.score)} size="sm" />
                         <div>
-                          <p className="text-sm font-semibold text-slate-800">{labelFor(s.criterion_key)}</p>
-                          <p className="mt-0.5 text-sm text-slate-600">{s.justification}</p>
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{labelFor(s.criterion_key)}</p>
+                          <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-300">{s.justification}</p>
                         </div>
                       </div>
                     ))}
@@ -197,12 +191,12 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
                   <SectionTitle title="Momentos importantes" subtitle="Dores, objeções, viradas e riscos" />
                   <div className="space-y-3">
                     {highlights.map((h) => (
-                      <div key={h.id} className="rounded-xl border border-border bg-slate-50 p-3">
+                      <div key={h.id} className="rounded-xl border border-border bg-slate-50 dark:bg-slate-800/60 p-3">
                         <div className="mb-1 flex items-center gap-2">
                           <Pill tone={HIGHLIGHT_TONE[h.kind] ?? 'slate'}>{h.kind}</Pill>
                           {h.timestamp_ref && <span className="text-xs text-slate-400">{h.timestamp_ref}</span>}
                         </div>
-                        {h.quote && <p className="text-sm italic text-slate-700">“{h.quote}”</p>}
+                        {h.quote && <p className="text-sm italic text-slate-700 dark:text-slate-300">“{h.quote}”</p>}
                         {h.comment && <p className="mt-1 text-sm text-slate-500">{h.comment}</p>}
                       </div>
                     ))}
@@ -219,8 +213,8 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
             <Card>
               <CardBody>
                 <details>
-                  <summary className="cursor-pointer text-sm font-semibold text-slate-700">Ver transcrição</summary>
-                  <pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-50 p-4 font-mono text-xs leading-relaxed text-slate-600">
+                  <summary className="cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">Ver transcrição</summary>
+                  <pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-50 dark:bg-slate-800/60 p-4 font-mono text-xs leading-relaxed text-slate-600 dark:text-slate-300">
                     {call.transcript}
                   </pre>
                 </details>
@@ -250,7 +244,7 @@ function TalkBar({ closer, client, closerName }: { closer: number | null; client
         <div className="flex items-center justify-center bg-indigo-500 text-[10px] font-semibold text-white" style={{ width: `${c}%` }}>
           {c}%
         </div>
-        <div className="flex items-center justify-center bg-slate-300 text-[10px] font-semibold text-slate-700" style={{ width: `${cl}%` }}>
+        <div className="flex items-center justify-center bg-slate-300 text-[10px] font-semibold text-slate-700 dark:text-slate-300" style={{ width: `${cl}%` }}>
           {cl}%
         </div>
       </div>

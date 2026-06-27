@@ -89,12 +89,12 @@ export default async function DashboardPage() {
                     <Link
                       key={closer.id}
                       href={`/closers/${closer.id}`}
-                      className="flex items-center gap-4 py-3 transition hover:bg-slate-50"
+                      className="flex items-center gap-4 py-3 transition hover:bg-slate-50 dark:bg-slate-800/60"
                     >
                       <span className="w-5 text-sm font-bold text-slate-400">{idx + 1}</span>
                       <Avatar name={closer.name} />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-slate-900">{closer.name}</p>
+                        <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{closer.name}</p>
                         <p className="text-xs text-slate-400">{m!.callsAnalyzed} calls analisadas</p>
                       </div>
                       <div className="w-40">
@@ -130,14 +130,14 @@ export default async function DashboardPage() {
             <Card>
               <div className="divide-y divide-border">
                 {recentCalls.map((call) => (
-                  <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50">
+                  <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:bg-slate-800/60">
                     <Avatar name={call.closer?.name ?? '?'} size={32} />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-900">{call.client_name}</p>
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{call.client_name}</p>
                       <p className="text-xs text-slate-400">{call.closer?.name} · {fmtDate(call.call_date)}</p>
                     </div>
                     <StatusBadge status={call.status} />
-                    <span className="w-10 text-right text-sm font-bold text-slate-700">{fmtScore(call.overall_score)}</span>
+                    <span className="w-10 text-right text-sm font-bold text-slate-700 dark:text-slate-300">{fmtScore(call.overall_score)}</span>
                   </Link>
                 ))}
               </div>

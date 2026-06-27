@@ -23,7 +23,7 @@ export default async function CriteriaPage() {
       />
 
       <Card className="mb-5 border-indigo-100 bg-indigo-50/40">
-        <CardBody className="text-sm text-slate-700">
+        <CardBody className="text-sm text-slate-700 dark:text-slate-300">
           Cada critério recebe uma nota de <strong>0 a 10</strong>. A nota geral é a média ponderada pelos pesos
           abaixo. Editar a rubrica pela interface entra na fase 2 — por ora, ajuste em{' '}
           <code className="rounded bg-indigo-100 px-1">supabase/migrations/0002_seed_criteria.sql</code> e em{' '}
@@ -35,12 +35,12 @@ export default async function CriteriaPage() {
         {criteria.map((c, i) => (
           <Card key={c.id}>
             <CardBody className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-500">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-bold text-slate-500">
                 {i + 1}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-900">{c.label}</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{c.label}</p>
                   <Pill tone="indigo">peso {Number(c.weight).toFixed(1)}</Pill>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">{c.description}</p>

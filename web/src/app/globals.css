@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode por classe (.dark no <html>) — controlado pelo ThemeToggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f6f7fb;
   --foreground: #0f172a;
@@ -7,6 +10,15 @@
   --border: #e7e9f0;
   --muted: #64748b;
   --brand: #4f46e5;
+}
+
+.dark {
+  --background: #0a0f1c;
+  --foreground: #e6edf6;
+  --card: #0f172a;
+  --border: #1e293b;
+  --muted: #94a3b8;
+  --brand: #6366f1;
 }
 
 @theme inline {
@@ -38,4 +50,10 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #aab3c6;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }

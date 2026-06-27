@@ -27,7 +27,7 @@ export function SectionTitle({
   return (
     <div className="mb-4 flex items-start justify-between gap-4">
       <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
         {subtitle && <p className="mt-0.5 text-sm text-slate-500">{subtitle}</p>}
       </div>
       {action}
@@ -50,7 +50,7 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
       </div>
       {action}
@@ -66,7 +66,7 @@ export function StatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset',
-        STATUS_TONE[status] ?? 'bg-slate-100 text-slate-600 ring-slate-200',
+        STATUS_TONE[status] ?? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-slate-200 dark:ring-slate-700',
       )}
     >
       {STATUS_LABELS[status] ?? status}
@@ -128,7 +128,7 @@ export function ScoreBar({ score }: { score: number | null }) {
             : 'bg-rose-500'
   return (
     <div className="flex items-center gap-3">
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
         <div className={cn('h-full rounded-full', fill)} style={{ width: `${pct}%` }} />
       </div>
       <span className={cn('w-9 text-right text-sm font-semibold tabular-nums', tone.text)}>{fmtScore(score)}</span>
@@ -157,7 +157,7 @@ export function StatCard({
       <CardBody className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
+          <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{value}</p>
           <div className="mt-1 flex items-center gap-2">
             {trend !== undefined && trend !== null && <TrendPill value={trend} />}
             {hint && <span className="text-xs text-slate-400">{hint}</span>}
@@ -198,7 +198,7 @@ export function EmptyState({
   return (
     <Card>
       <CardBody className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-        <p className="text-sm font-semibold text-slate-700">{title}</p>
+        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{title}</p>
         {description && <p className="max-w-md text-sm text-slate-500">{description}</p>}
         {action && <div className="mt-2">{action}</div>}
       </CardBody>
@@ -213,8 +213,8 @@ const btnBase =
   'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-50'
 const btnVariants = {
   primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm',
-  secondary: 'bg-white text-slate-700 ring-1 ring-inset ring-slate-200 hover:bg-slate-50',
-  ghost: 'text-slate-600 hover:bg-slate-100',
+  secondary: 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:bg-slate-800/60',
+  ghost: 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:bg-slate-800',
   danger: 'bg-rose-600 text-white hover:bg-rose-700',
 }
 
@@ -263,7 +263,7 @@ export function Pill({ tone = 'slate', children }: { tone?: 'emerald' | 'rose' |
     rose: 'bg-rose-50 text-rose-700 ring-rose-200',
     amber: 'bg-amber-50 text-amber-700 ring-amber-200',
     indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
-    slate: 'bg-slate-100 text-slate-600 ring-slate-200',
+    slate: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-slate-200 dark:ring-slate-700',
   }
   return (
     <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset', tones[tone])}>

@@ -13,7 +13,7 @@ import type { RootCause } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
-const PRIORITY = { 1: { label: 'Alta', tone: 'text-rose-600 bg-rose-50' }, 2: { label: 'Média', tone: 'text-amber-600 bg-amber-50' }, 3: { label: 'Baixa', tone: 'text-slate-500 bg-slate-100' } } as const
+const PRIORITY = { 1: { label: 'Alta', tone: 'text-rose-600 bg-rose-50' }, 2: { label: 'Média', tone: 'text-amber-600 bg-amber-50' }, 3: { label: 'Baixa', tone: 'text-slate-500 bg-slate-100 dark:bg-slate-800' } } as const
 
 export default async function FeedbackPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -47,7 +47,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
         <div className="mb-6 flex flex-wrap items-center gap-4">
           <ScoreBadge score={analysis.overall_score} size="lg" />
           <div className="flex-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Feedback final</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Feedback final</h1>
             <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               {closer && (
                 <span className="flex items-center gap-1.5"><Avatar name={closer.name} size={20} /> {closer.name}</span>
@@ -65,7 +65,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
               <Quote size={22} className="shrink-0 text-indigo-400" />
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">Comentário final</p>
-                <p className="mt-1 text-[15px] leading-relaxed text-slate-800">{feedback.final_comment}</p>
+                <p className="mt-1 text-[15px] leading-relaxed text-slate-800 dark:text-slate-200">{feedback.final_comment}</p>
               </div>
             </div>
           </CardBody>
@@ -98,7 +98,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
                 <Lightbulb size={20} className="shrink-0 text-amber-500" />
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-amber-600">Como conduzir melhor</p>
-                  <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700">{feedback.better_approach}</p>
+                  <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-300">{feedback.better_approach}</p>
                 </div>
               </div>
             </CardBody>
@@ -114,7 +114,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
                 .sort((a, b) => Number(b.score) - Number(a.score))
                 .map((s) => (
                   <div key={s.id}>
-                    <p className="mb-1 text-sm font-medium text-slate-700">{labelFor(s.criterion_key)}</p>
+                    <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">{labelFor(s.criterion_key)}</p>
                     <ScoreBar score={Number(s.score)} />
                   </div>
                 ))}
@@ -134,14 +134,14 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
                   const prio = PRIORITY[(a.priority as 1 | 2 | 3)] ?? PRIORITY[2]
                   const applied = a.status === 'aplicada'
                   return (
-                    <div key={a.id} className={`rounded-xl border p-3 ${applied ? 'border-emerald-200 bg-emerald-50/50' : 'border-border bg-white'}`}>
+                    <div key={a.id} className={`rounded-xl border p-3 ${applied ? 'border-emerald-200 bg-emerald-50/50' : 'border-border bg-white dark:bg-slate-900'}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <span className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${prio.tone}`}>{prio.label}</span>
-                            <p className={`text-sm font-semibold ${applied ? 'text-emerald-800 line-through' : 'text-slate-800'}`}>{a.title}</p>
+                            <p className={`text-sm font-semibold ${applied ? 'text-emerald-800 line-through' : 'text-slate-800 dark:text-slate-200'}`}>{a.title}</p>
                           </div>
-                          {a.detail && <p className="mt-1 text-sm text-slate-600">{a.detail}</p>}
+                          {a.detail && <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{a.detail}</p>}
                         </div>
                         <form action={setActionStatus} className="shrink-0">
                           <input type="hidden" name="id" value={a.id} />
@@ -174,7 +174,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
 
 function Backlink({ id }: { id: string }) {
   return (
-    <Link href={`/calls/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+    <Link href={`/calls/${id}`} className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
       <ArrowLeft size={15} /> Voltar para a call
     </Link>
   )
@@ -195,13 +195,13 @@ function FeedbackList({
   return (
     <Card>
       <CardBody>
-        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">{icon} {title}</p>
+        <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">{icon} {title}</p>
         {!items || items.length === 0 ? (
           <p className="text-sm text-slate-400">—</p>
         ) : (
           <ul className="space-y-2">
             {items.map((it, i) => (
-              <li key={i} className="flex gap-2 text-sm text-slate-700">
+              <li key={i} className="flex gap-2 text-sm text-slate-700 dark:text-slate-300">
                 <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
                 {it}
               </li>

@@ -3,21 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { analyzeCall } from '@/lib/ai/analyze'
-import type { AiRelatorioComercial } from '@/lib/ai/schema'
 import { isAIEnabled, AI_DISABLED_MESSAGE } from '@/lib/ai/config'
-import { sendSlackSummary } from '@/lib/slack/notify'
 import { RUBRIC_VERSION } from '@/lib/criteria'
 import type { ActionStatus } from '@/lib/types'
-
-function appUrl(path: string): string {
-  const base = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  return base.replace(/\/$/, '') + path
-}
 
 /**
  * Full analysis pipeline for a call:
  *   load → AI analyze → persist (analysis, scores, highlights, feedback, actions)
- *   → notify Slack → update statuses.
+ *   → update statuses.
  * Keeps a single current analysis per call (old ones are replaced).
  */
 export async function runAnalysis(callId: string): Promise<{ ok: boolean; error?: string }> {
@@ -126,9 +119,6 @@ export async function runAnalysis(callId: string): Promise<{ ok: boolean; error?
 
     await db.from('calls').update({ status: 'concluida' }).eq('id', callId)
 
-    // Notify Slack (best-effort; always logged)
-    await notifySlack(callId)
-
     revalidatePath(`/calls/${callId}`)
     revalidatePath('/calls')
     revalidatePath('/')
@@ -148,74 +138,6 @@ export async function analyzeCallAction(formData: FormData) {
   const callId = String(formData.get('id'))
   await runAnalysis(callId)
   revalidatePath(`/calls/${callId}`)
-}
-
-/** Build the Slack summary from the persisted analysis and send it. */
-export async function notifySlack(callId: string): Promise<{ ok: boolean; error: string | null }> {
-  const db = supabaseAdmin()
-
-  const { data: call } = await db
-    .from('calls')
-    .select('*, closer:closers(name)')
-    .eq('id', callId)
-    .single()
-  if (!call) return { ok: false, error: 'Call não encontrada.' }
-
-  const { data: analysis } = await db
-    .from('call_analyses')
-    .select('*, feedbacks(*), improvement_actions(title, priority)')
-    .eq('call_id', callId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
-  if (!analysis) return { ok: false, error: 'Análise não encontrada.' }
-
-  const feedback = analysis.feedbacks?.[0] ?? analysis.feedbacks ?? {}
-  const actions = (analysis.improvement_actions ?? [])
-    .sort((a: { priority: number }, b: { priority: number }) => a.priority - b.priority)
-    .map((a: { title: string }) => a.title)
-
-  // Resumo comercial (vem da saída da IA guardada em raw).
-  const rc = (analysis.raw as { relatorio_comercial?: AiRelatorioComercial } | null)?.relatorio_comercial
-  const commercial = rc
-    ? {
-        temperatura: rc.temperatura_do_lead,
-        probabilidade: rc.probabilidade_estimada_de_fechamento,
-        proximoPasso: rc.proximo_passo_ideal,
-        risco: rc.risco_de_perda,
-      }
-    : null
-
-  const result = await sendSlackSummary({
-    closerName: call.closer?.name ?? 'Closer',
-    clientName: call.client_name,
-    callDate: call.call_date,
-    overallScore: analysis.overall_score,
-    summary: analysis.summary ?? '',
-    strengths: feedback.strengths ?? [],
-    improvements: feedback.fix_doing ?? feedback.weaknesses ?? [],
-    actions,
-    callUrl: appUrl(`/calls/${callId}`),
-    commercial,
-  })
-
-  await db.from('slack_logs').insert({
-    call_id: callId,
-    channel: 'webhook',
-    payload: result.payload,
-    ok: result.ok,
-    error: result.error,
-  })
-
-  return { ok: result.ok, error: result.error }
-}
-
-/** Action wrapper to (re)send the Slack summary. */
-export async function resendSlackAction(formData: FormData) {
-  const callId = String(formData.get('id'))
-  await notifySlack(callId)
-  revalidatePath(`/calls/${callId}`)
-  revalidatePath('/settings/slack')
 }
 
 /** Update an improvement action's status (drives "feedbacks aplicados"). */

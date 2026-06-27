@@ -40,14 +40,14 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
 
     return (
       <>
-        <Link href="/closers" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
+        <Link href="/closers" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 dark:text-slate-200">
           <ArrowLeft size={15} /> Closers
         </Link>
 
         <div className="mb-6 flex items-center gap-4">
           <Avatar name={closer.name} size={56} />
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{closer.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{closer.name}</h1>
             <p className="text-sm text-slate-500">{closer.role ?? 'Closer'}{closer.email ? ` · ${closer.email}` : ''}</p>
           </div>
         </div>
@@ -97,7 +97,7 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
                     {evolution.strengths.length === 0 && <p className="text-xs text-slate-400">—</p>}
                     {evolution.strengths.map((s) => (
                       <div key={s.key} className="flex items-center justify-between gap-2">
-                        <span className="text-sm text-slate-700">{s.label}</span>
+                        <span className="text-sm text-slate-700 dark:text-slate-300">{s.label}</span>
                         <span className="text-xs font-semibold text-emerald-600">{fmtScore(s.avg)}</span>
                       </div>
                     ))}
@@ -109,7 +109,7 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
                     {evolution.weaknesses.length === 0 && <p className="text-xs text-slate-400">—</p>}
                     {evolution.weaknesses.map((s) => (
                       <div key={s.key} className="flex items-center justify-between gap-2">
-                        <span className="text-sm text-slate-700">{s.label}</span>
+                        <span className="text-sm text-slate-700 dark:text-slate-300">{s.label}</span>
                         <span className="text-xs font-semibold text-rose-600">{fmtScore(s.avg)}</span>
                       </div>
                     ))}
@@ -129,10 +129,10 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
                     const delta = r.recent != null && r.previous != null ? r.recent - r.previous : null
                     return (
                       <div key={r.criterion_key} className="flex items-center gap-3 text-sm">
-                        <span className="flex-1 truncate text-slate-700">{r.label}</span>
+                        <span className="flex-1 truncate text-slate-700 dark:text-slate-300">{r.label}</span>
                         <span className="w-10 text-right tabular-nums text-slate-400">{fmtScore(r.previous)}</span>
                         <span className="text-slate-300">→</span>
-                        <span className="w-10 text-right font-semibold tabular-nums text-slate-700">{fmtScore(r.recent)}</span>
+                        <span className="w-10 text-right font-semibold tabular-nums text-slate-700 dark:text-slate-300">{fmtScore(r.recent)}</span>
                         <span className="w-14 text-right">
                           {delta != null ? (
                             <Pill tone={delta >= 0 ? 'emerald' : 'rose'}>{delta >= 0 ? '+' : ''}{delta.toFixed(1)}</Pill>
@@ -160,13 +160,13 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
             <Card>
               <div className="divide-y divide-border">
                 {calls.map((call) => (
-                  <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50">
+                  <Link key={call.id} href={`/calls/${call.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:bg-slate-800/60">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold text-slate-900">{call.client_name}</p>
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{call.client_name}</p>
                       <p className="text-xs text-slate-400">{fmtDate(call.call_date)}</p>
                     </div>
                     <StatusBadge status={call.status} />
-                    <span className="flex items-center gap-1 text-sm font-bold text-slate-700">
+                    <span className="flex items-center gap-1 text-sm font-bold text-slate-700 dark:text-slate-300">
                       {call.status === 'concluida' || call.status === 'revisada' ? <CheckCircle2 size={14} className="text-emerald-500" /> : null}
                       {fmtScore(call.overall_score)}
                     </span>

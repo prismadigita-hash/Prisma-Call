@@ -42,7 +42,7 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
       <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
         {icon} {title}
       </p>
-      <p className="text-sm leading-relaxed text-slate-700">{children}</p>
+      <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{children}</p>
     </div>
   )
 }
@@ -52,7 +52,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
   const prob = Math.max(0, Math.min(100, report.probabilidade_estimada_de_fechamento))
 
   return (
-    <Card className="border-slate-200">
+    <Card className="border-slate-200 dark:border-slate-700">
       <CardBody>
         {/* Header */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -61,7 +61,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
               <Briefcase size={18} />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Relatório Comercial da Oportunidade</h3>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Relatório Comercial da Oportunidade</h3>
               <p className="text-xs text-slate-400">Visão do cliente e chance de venda</p>
             </div>
           </div>
@@ -75,7 +75,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
         </div>
 
         {/* Probabilidade de fechamento */}
-        <div className="mb-5 rounded-xl border border-border bg-slate-50 p-4">
+        <div className="mb-5 rounded-xl border border-border bg-slate-50 dark:bg-slate-800/60 p-4">
           <div className="mb-2 flex items-end justify-between">
             <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500">
               <TrendingUp size={13} /> Probabilidade estimada de fechamento
@@ -86,7 +86,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
             <div className={cn('h-full rounded-full', probColor(prob))} style={{ width: `${prob}%` }} />
           </div>
           {report.probabilidade_justificativa && (
-            <p className="mt-2 text-sm text-slate-600">{report.probabilidade_justificativa}</p>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{report.probabilidade_justificativa}</p>
           )}
         </div>
 

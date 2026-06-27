@@ -149,10 +149,10 @@ export function BarList({ items }: { items: { label: string; value: number | nul
           <div key={it.label} className="grid grid-cols-[1fr_auto] items-center gap-3">
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">{it.label}</span>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{it.label}</span>
                 <span className="text-xs font-semibold tabular-nums text-slate-500">{fmtScore(it.value)}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div className={`h-full rounded-full ${fill}`} style={{ width: `${pct}%` }} />
               </div>
             </div>

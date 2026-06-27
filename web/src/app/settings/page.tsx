@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { CheckCircle2, XCircle, ExternalLink, Webhook } from 'lucide-react'
 import { PageHeader, Card, CardBody, SectionTitle, Pill } from '@/components/ui'
 import { CopyField } from '@/components/copy-field'
@@ -10,10 +9,10 @@ function ConfigRow({ ok, label, hint }: { ok: boolean; label: string; hint: stri
     <div className="flex items-start gap-3 py-3">
       {ok ? <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-500" size={20} /> : <XCircle className="mt-0.5 shrink-0 text-slate-300" size={20} />}
       <div>
-        <p className="text-sm font-semibold text-slate-800">{label}</p>
+        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{label}</p>
         <p className="text-sm text-slate-500">{hint}</p>
       </div>
-      <span className={`ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+      <span className={`ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}>
         {ok ? 'Configurado' : 'Pendente'}
       </span>
     </div>
@@ -25,7 +24,6 @@ export default function SettingsPage() {
     supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
     supabaseService: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     gemini: Boolean(process.env.GEMINI_API_KEY),
-    slack: Boolean(process.env.SLACK_WEBHOOK_URL),
   }
 
   const appUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
@@ -43,7 +41,6 @@ export default function SettingsPage() {
             <ConfigRow ok={cfg.supabaseUrl} label="Supabase — URL e chave pública" hint="NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY" />
             <ConfigRow ok={cfg.supabaseService} label="Supabase — service_role" hint="SUPABASE_SERVICE_ROLE_KEY (acesso total do backend, secreto)" />
             <ConfigRow ok={cfg.gemini} label="Gemini (Google AI)" hint="GEMINI_API_KEY — necessária para analisar calls. Vazia = modo manual (sem IA)." />
-            <ConfigRow ok={cfg.slack} label="Slack — Incoming Webhook" hint="SLACK_WEBHOOK_URL — envio automático de resumos" />
           </div>
         </CardBody>
       </Card>
@@ -56,7 +53,7 @@ export default function SettingsPage() {
               <Webhook size={18} />
             </div>
             <div className="flex-1">
-              <h2 className="text-base font-semibold text-slate-900">Webhook do Tactiq</h2>
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Webhook do Tactiq</h2>
               <p className="text-sm text-slate-500">Recebe calls transcritas e dispara a análise automaticamente</p>
             </div>
             <Pill tone={secretSet ? 'emerald' : 'amber'}>{secretSet ? 'Protegido por segredo' : 'Sem segredo'}</Pill>
@@ -67,8 +64,8 @@ export default function SettingsPage() {
             <CopyField label="Exemplo local" value="http://localhost:3000/api/webhooks/tactiq" />
           </div>
 
-          <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
-            <p className="font-semibold text-slate-700">Como usar</p>
+          <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-xs text-slate-600 dark:text-slate-300">
+            <p className="font-semibold text-slate-700 dark:text-slate-300">Como usar</p>
             <ol className="mt-1 list-inside list-decimal space-y-0.5">
               <li>Método <code className="rounded bg-slate-200 px-1">POST</code> · Content-Type <code className="rounded bg-slate-200 px-1">application/json</code>.</li>
               <li>Envie o campo <code className="rounded bg-slate-200 px-1">transcricao</code> (obrigatório) + closer, cliente, empresa, data_da_call, link_da_reuniao, participantes.</li>
@@ -84,9 +81,9 @@ export default function SettingsPage() {
         <Card>
           <CardBody>
             <SectionTitle title="Banco de dados" />
-            <p className="text-sm text-slate-600">
-              As migrations ficam em <code className="rounded bg-slate-100 px-1">supabase/migrations</code>. Rode no
-              SQL Editor na ordem (0001, 0002, 0003) — ou cole o <code className="rounded bg-slate-100 px-1">supabase/schema.sql</code> de uma vez.
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              As migrations ficam em <code className="rounded bg-slate-100 dark:bg-slate-800 px-1">supabase/migrations</code>. Rode no
+              SQL Editor na ordem (0001, 0002, 0003) — ou cole o <code className="rounded bg-slate-100 dark:bg-slate-800 px-1">supabase/schema.sql</code> de uma vez.
             </p>
           </CardBody>
         </Card>
@@ -96,8 +93,6 @@ export default function SettingsPage() {
             <ul className="space-y-2 text-sm">
               <li><a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-indigo-600 hover:underline">Supabase Dashboard <ExternalLink size={13} /></a></li>
               <li><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-indigo-600 hover:underline">Google AI Studio — API key (Gemini) <ExternalLink size={13} /></a></li>
-              <li><a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-indigo-600 hover:underline">Slack Incoming Webhooks <ExternalLink size={13} /></a></li>
-              <li><Link href="/settings/slack" className="text-indigo-600 hover:underline">Configurar e testar Slack →</Link></li>
             </ul>
           </CardBody>
         </Card>

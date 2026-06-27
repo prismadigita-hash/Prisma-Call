@@ -7,8 +7,8 @@ import type { ReactNode } from 'react'
 
 const variants = {
   primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm',
-  secondary: 'bg-white text-slate-700 ring-1 ring-inset ring-slate-200 hover:bg-slate-50',
-  ghost: 'text-slate-600 hover:bg-slate-100',
+  secondary: 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:bg-slate-800/60',
+  ghost: 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:bg-slate-800',
   danger: 'bg-rose-600 text-white hover:bg-rose-700',
 }
 
