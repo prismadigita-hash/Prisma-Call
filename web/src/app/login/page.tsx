@@ -1,6 +1,6 @@
-import { Sparkles, LogIn, UserPlus, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Sparkles, LogIn, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Card, CardBody, SubmitButton } from '@/components/ui'
-import { signIn, signUp } from '@/lib/actions/auth'
+import { signIn } from '@/lib/actions/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +42,7 @@ export default async function LoginPage({
             </div>
           )}
 
-          <form className="space-y-3">
+          <form action={signIn} className="space-y-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">E-mail</label>
               <input name="email" type="email" required className={inputCls} placeholder="voce@empresa.com" />
@@ -51,9 +51,8 @@ export default async function LoginPage({
               <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Senha</label>
               <input name="password" type="password" required minLength={6} className={inputCls} placeholder="••••••••" />
             </div>
-            <div className="flex flex-col gap-2 pt-1">
-              <SubmitButton formAction={signIn} className="w-full"><LogIn size={16} /> Entrar</SubmitButton>
-              <SubmitButton formAction={signUp} variant="secondary" className="w-full"><UserPlus size={16} /> Criar conta</SubmitButton>
+            <div className="pt-1">
+              <SubmitButton className="w-full"><LogIn size={16} /> Entrar</SubmitButton>
             </div>
           </form>
         </CardBody>
