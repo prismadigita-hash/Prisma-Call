@@ -1,0 +1,91 @@
+{
+  "name": "Tactiq -> Call Intelligence",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "fileCreated",
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "Download File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "Extract From File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://SEU-DOMINIO/api/webhooks/tactiq",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "x-webhook-secret", "value": "VgAcN3uaySKn1LPIf6VtupN3nLVK5zY5" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"transcricao\": {{ JSON.stringify($json.text) }},\n  \"titulo_da_call\": {{ JSON.stringify($('Google Drive Trigger').item.json.name) }},\n  \"data_da_call\": {{ JSON.stringify($('Google Drive Trigger').item.json.createdTime) }},\n  \"link_da_reuniao\": {{ JSON.stringify($('Google Drive Trigger').item.json.webViewLink) }},\n  \"closer\": \"\",\n  \"cliente\": \"\",\n  \"empresa\": \"\",\n  \"origem\": \"tactiq\"\n}",
+        "options": {}
+      },
+      "id": "44444444-4444-4444-4444-444444444444",
+      "name": "Enviar para Call Intelligence",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [[{ "node": "Download File", "type": "main", "index": 0 }]]
+    },
+    "Download File": {
+      "main": [[{ "node": "Extract From File", "type": "main", "index": 0 }]]
+    },
+    "Extract From File": {
+      "main": [[{ "node": "Enviar para Call Intelligence", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}
