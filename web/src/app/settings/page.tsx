@@ -21,7 +21,7 @@ function ConfigRow({ ok, label, hint }: { ok: boolean; label: string; hint: stri
 
 export default function SettingsPage() {
   const cfg = {
-    supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
+    supabaseUrl: Boolean(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
     supabaseService: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     gemini: Boolean(process.env.GEMINI_API_KEY),
   }
@@ -38,7 +38,7 @@ export default function SettingsPage() {
         <CardBody>
           <SectionTitle title="Integrações" subtitle="Defina os valores em .env.local e reinicie o servidor" />
           <div className="divide-y divide-border">
-            <ConfigRow ok={cfg.supabaseUrl} label="Supabase — URL e chave pública" hint="NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY" />
+            <ConfigRow ok={cfg.supabaseUrl} label="Supabase — URL e chave pública" hint="SUPABASE_URL (ou NEXT_PUBLIC_SUPABASE_URL)" />
             <ConfigRow ok={cfg.supabaseService} label="Supabase — service_role" hint="SUPABASE_SERVICE_ROLE_KEY (acesso total do backend, secreto)" />
             <ConfigRow ok={cfg.gemini} label="Gemini (Google AI)" hint="GEMINI_API_KEY — necessária para analisar calls. Vazia = modo manual (sem IA)." />
           </div>
