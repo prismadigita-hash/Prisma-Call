@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { PageHeader, Card, CardBody, Avatar, StatusBadge, ButtonLink, EmptyState } from '@/components/ui'
 import { SetupBanner } from '@/components/setup-banner'
+import { AutoRefresh } from '@/components/auto-refresh'
 import { listCalls, listClosers } from '@/lib/data/queries'
 import { fmtScore, fmtDate, STATUS_LABELS } from '@/lib/utils'
 
@@ -24,6 +25,7 @@ export default async function CallsPage({
 
     return (
       <>
+        <AutoRefresh seconds={15} />
         <PageHeader
           title="Calls"
           subtitle="Todas as calls cadastradas e seus status de análise"

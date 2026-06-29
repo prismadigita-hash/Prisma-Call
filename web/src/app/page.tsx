@@ -15,6 +15,7 @@ import {
 } from '@/components/ui'
 import { BarList } from '@/components/charts'
 import { SetupBanner } from '@/components/setup-banner'
+import { AutoRefresh } from '@/components/auto-refresh'
 import { listClosers, listCalls } from '@/lib/data/queries'
 import { getDashboardMetrics } from '@/lib/data/metrics'
 import { fmtScore, fmtDate } from '@/lib/utils'
@@ -42,6 +43,7 @@ export default async function DashboardPage() {
 
     return (
       <>
+        <AutoRefresh seconds={30} />
         <PageHeader
           title="Dashboard"
           subtitle="Visão geral da performance e evolução do time comercial"

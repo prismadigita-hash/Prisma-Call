@@ -50,15 +50,17 @@ body {
 .dark body::before {
   content: '';
   position: fixed;
-  inset: -25%;
+  inset: -15%;
   z-index: -1;
   pointer-events: none;
+  /* gradientes radiais já são suaves -> sem filter: blur (pesado para a GPU) */
   background:
-    radial-gradient(40% 40% at 20% 20%, rgba(56, 189, 248, 0.16), transparent 60%),
-    radial-gradient(45% 45% at 82% 22%, rgba(99, 102, 241, 0.20), transparent 60%),
-    radial-gradient(40% 40% at 55% 105%, rgba(37, 99, 235, 0.16), transparent 60%);
-  filter: blur(40px) saturate(120%);
-  animation: aurora 16s ease-in-out infinite alternate;
+    radial-gradient(38% 38% at 20% 18%, rgba(56, 189, 248, 0.14), transparent 60%),
+    radial-gradient(42% 42% at 82% 22%, rgba(99, 102, 241, 0.18), transparent 60%),
+    radial-gradient(38% 38% at 55% 105%, rgba(37, 99, 235, 0.14), transparent 60%);
+  will-change: transform;
+  transform: translateZ(0);
+  animation: aurora 22s ease-in-out infinite alternate;
 }
 
 @keyframes aurora {
