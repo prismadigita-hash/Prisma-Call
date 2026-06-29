@@ -15,7 +15,10 @@ import {
   ButtonLink,
 } from '@/components/ui'
 import { LineChart, RadarChart } from '@/components/charts'
+import { ConfirmButton } from '@/components/confirm-button'
 import { SetupBanner } from '@/components/setup-banner'
+import { deleteCloser } from '@/lib/actions/closers'
+import { Trash2 } from 'lucide-react'
 import { shortLabelFor } from '@/lib/criteria'
 import { getCloser, listCalls } from '@/lib/data/queries'
 import { getCloserEvolution, countAppliedActions } from '@/lib/data/metrics'
@@ -44,12 +47,18 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
           <ArrowLeft size={15} /> Closers
         </Link>
 
-        <div className="mb-6 flex items-center gap-4">
+        <div className="mb-6 flex flex-wrap items-center gap-4">
           <Avatar name={closer.name} size={56} />
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{closer.name}</h1>
             <p className="text-sm text-slate-500">{closer.role ?? 'Closer'}{closer.email ? ` · ${closer.email}` : ''}</p>
           </div>
+          <form action={deleteCloser}>
+            <input type="hidden" name="id" value={closer.id} />
+            <ConfirmButton confirmMessage={`Excluir o Closer "${closer.name}"? Isso também apaga TODAS as calls e análises dele. Esta ação não pode ser desfeita.`}>
+              <Trash2 size={16} /> Excluir Closer
+            </ConfirmButton>
+          </form>
         </div>
 
         {/* KPIs */}

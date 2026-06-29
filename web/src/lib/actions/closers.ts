@@ -19,6 +19,20 @@ export async function createCloser(formData: FormData) {
   redirect('/closers')
 }
 
+/**
+ * Exclui um Closer. ATENÇÃO: por causa do ON DELETE CASCADE, isso apaga também
+ * todas as calls, análises, notas e feedbacks vinculados a esse Closer.
+ */
+export async function deleteCloser(formData: FormData) {
+  const id = String(formData.get('id'))
+  const { error } = await supabaseAdmin().from('closers').delete().eq('id', id)
+  if (error) throw error
+  revalidatePath('/closers')
+  revalidatePath('/calls')
+  revalidatePath('/')
+  redirect('/closers')
+}
+
 export async function toggleCloserActive(formData: FormData) {
   const id = String(formData.get('id'))
   const active = String(formData.get('active')) === 'true'

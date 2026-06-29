@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound, unstable_rethrow } from 'next/navigation'
-import { ArrowLeft, Sparkles, CheckCircle2, FileText, Clock, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Sparkles, CheckCircle2, FileText, Clock, AlertCircle, Trash2 } from 'lucide-react'
 import {
   PageHeader,
   Card,
@@ -22,7 +22,8 @@ import { getFullAnalysis, listClosers } from '@/lib/data/queries'
 import { isAIEnabled } from '@/lib/ai/config'
 import { labelFor, shortLabelFor } from '@/lib/criteria'
 import { analyzeCallAction } from '@/lib/actions/analysis'
-import { markReviewed, updateCall } from '@/lib/actions/calls'
+import { markReviewed, updateCall, deleteCall } from '@/lib/actions/calls'
+import { ConfirmButton } from '@/components/confirm-button'
 import { fmtScore, fmtDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -102,6 +103,12 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
                   <PendingButton variant="ghost"><CheckCircle2 size={16} /> Marcar revisada</PendingButton>
                 </form>
               )}
+              <form action={deleteCall}>
+                <input type="hidden" name="id" value={call.id} />
+                <ConfirmButton confirmMessage={`Excluir esta call (${call.client_name}) e sua análise? Esta ação não pode ser desfeita.`}>
+                  <Trash2 size={16} /> Excluir
+                </ConfirmButton>
+              </form>
             </div>
           </CardBody>
         </Card>
