@@ -99,14 +99,14 @@ export default async function NewCallPage() {
               </div>
 
               {aiEnabled ? (
-                <label className="flex items-center gap-2 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-800">
+                <label className="flex items-center gap-2 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-800 dark:bg-indigo-500/10 dark:text-indigo-200">
                   <input type="checkbox" name="analyze_now" defaultChecked className="h-4 w-4 rounded border-slate-300" />
                   <span className="flex items-center gap-1.5 font-medium"><Sparkles size={15} /> Analisar com IA (Gemini) imediatamente após salvar</span>
                 </label>
               ) : (
                 <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3 text-sm text-slate-500">
                   <span className="flex items-center gap-1.5 font-medium"><Sparkles size={15} /> Modo manual: IA desativada.</span>
-                  <p className="mt-1 text-xs">Defina <code className="rounded bg-slate-200 px-1">GEMINI_API_KEY</code> em .env.local para habilitar a análise automática. A call será salva como pendente.</p>
+                  <p className="mt-1 text-xs">Defina <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">GEMINI_API_KEY</code> em .env.local para habilitar a análise automática. A call será salva como pendente.</p>
                 </div>
               )}
 

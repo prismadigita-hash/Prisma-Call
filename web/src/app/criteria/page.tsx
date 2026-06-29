@@ -22,12 +22,12 @@ export default async function CriteriaPage() {
         subtitle={`Rubrica usada pela IA para pontuar cada call · versão ${RUBRIC_VERSION}`}
       />
 
-      <Card className="mb-5 border-indigo-100 bg-indigo-50/40">
+      <Card className="mb-5 border-indigo-100 bg-indigo-50/40 dark:border-indigo-500/20 dark:bg-indigo-500/10">
         <CardBody className="text-sm text-slate-700 dark:text-slate-300">
           Cada critério recebe uma nota de <strong>0 a 10</strong>. A nota geral é a média ponderada pelos pesos
           abaixo. Editar a rubrica pela interface entra na fase 2 — por ora, ajuste em{' '}
-          <code className="rounded bg-indigo-100 px-1">supabase/migrations/0002_seed_criteria.sql</code> e em{' '}
-          <code className="rounded bg-indigo-100 px-1">src/lib/criteria.ts</code>.
+          <code className="rounded bg-indigo-100 dark:bg-indigo-500/20 dark:text-indigo-200 px-1">supabase/migrations/0002_seed_criteria.sql</code> e em{' '}
+          <code className="rounded bg-indigo-100 dark:bg-indigo-500/20 dark:text-indigo-200 px-1">src/lib/criteria.ts</code>.
         </CardBody>
       </Card>
 

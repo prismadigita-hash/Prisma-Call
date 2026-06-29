@@ -102,7 +102,7 @@ export function ScoreBadge({ score, size = 'md' }: { score: number | null | unde
 export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-full bg-indigo-100 font-semibold text-indigo-700"
+      className="flex shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-500/20 dark:text-indigo-200 font-semibold text-indigo-700"
       style={{ width: size, height: size, fontSize: size * 0.38 }}
     >
       {initials(name)}

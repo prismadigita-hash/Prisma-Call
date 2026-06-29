@@ -67,12 +67,12 @@ export default function SettingsPage() {
           <div className="mt-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 text-xs text-slate-600 dark:text-slate-300">
             <p className="font-semibold text-slate-700 dark:text-slate-300">Como usar</p>
             <ol className="mt-1 list-inside list-decimal space-y-0.5">
-              <li>Método <code className="rounded bg-slate-200 px-1">POST</code> · Content-Type <code className="rounded bg-slate-200 px-1">application/json</code>.</li>
-              <li>Envie o campo <code className="rounded bg-slate-200 px-1">transcricao</code> (obrigatório) + closer, cliente, empresa, data_da_call, link_da_reuniao, participantes.</li>
-              <li>Em produção, a URL usa <code className="rounded bg-slate-200 px-1">NEXT_PUBLIC_APP_URL</code> automaticamente.</li>
-              <li>Opcional: defina <code className="rounded bg-slate-200 px-1">TACTIQ_WEBHOOK_SECRET</code> e envie no header <code className="rounded bg-slate-200 px-1">x-webhook-secret</code>.</li>
+              <li>Método <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">POST</code> · Content-Type <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">application/json</code>.</li>
+              <li>Envie o campo <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">transcricao</code> (obrigatório) + closer, cliente, empresa, data_da_call, link_da_reuniao, participantes.</li>
+              <li>Em produção, a URL usa <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">NEXT_PUBLIC_APP_URL</code> automaticamente.</li>
+              <li>Opcional: defina <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">TACTIQ_WEBHOOK_SECRET</code> e envie no header <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">x-webhook-secret</code>.</li>
             </ol>
-            <p className="mt-2">Passo a passo completo (Tactiq + Zapier/Make) no <code className="rounded bg-slate-200 px-1">README.md</code>.</p>
+            <p className="mt-2">Passo a passo completo (Tactiq + Zapier/Make) no <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">README.md</code>.</p>
           </div>
         </CardBody>
       </Card>

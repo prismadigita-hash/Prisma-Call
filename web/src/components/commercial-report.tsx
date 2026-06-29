@@ -82,7 +82,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
             </p>
             <span className={cn('text-2xl font-bold tabular-nums', probText(prob))}>{prob}%</span>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:bg-slate-700">
             <div className={cn('h-full rounded-full', probColor(prob))} style={{ width: `${prob}%` }} />
           </div>
           {report.probabilidade_justificativa && (
