@@ -101,6 +101,16 @@ button {
   color: #fff;
 }
 
+/* Gráficos: pontos crescem ao passar o mouse (interatividade) */
+.radar-dot,
+.lc-dot {
+  transition: r 0.12s ease;
+}
+.radar-pt:hover .radar-dot,
+.lc-pt:hover .lc-dot {
+  r: 6;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

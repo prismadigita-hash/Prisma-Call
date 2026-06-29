@@ -41,21 +41,24 @@ export function LineChart({
 
       {gridYs.map((g) => (
         <g key={g}>
-          <line x1={pad.left} x2={W - pad.right} y1={yFor(g)} y2={yFor(g)} stroke="#eef0f5" strokeWidth={1} />
-          <text x={8} y={yFor(g) + 4} fontSize={10} fill="#94a3b8">
+          <line x1={pad.left} x2={W - pad.right} y1={yFor(g)} y2={yFor(g)} strokeWidth={1} className="stroke-slate-200 dark:stroke-slate-700/70" />
+          <text x={8} y={yFor(g) + 4} fontSize={10} className="fill-slate-400">
             {g}
           </text>
         </g>
       ))}
 
       <path d={areaPath} fill="url(#lc-area)" />
-      <path d={linePath} fill="none" stroke="#4f46e5" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+      <path d={linePath} fill="none" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" className="stroke-indigo-600 dark:stroke-indigo-400" />
 
       {points.map((p, i) => (
-        <g key={i}>
-          <circle cx={xFor(i)} cy={yFor(p.value)} r={4} fill="#fff" stroke="#4f46e5" strokeWidth={2} />
+        <g key={i} className="lc-pt">
+          <circle cx={xFor(i)} cy={yFor(p.value)} r={4} strokeWidth={2} className="lc-dot fill-white stroke-indigo-600 dark:fill-slate-900 dark:stroke-indigo-400" />
+          <circle cx={xFor(i)} cy={yFor(p.value)} r={12} fill="transparent" className="cursor-pointer">
+            <title>{`${p.label}: ${fmtScore(p.value)}`}</title>
+          </circle>
           {(points.length <= 10 || i === 0 || i === points.length - 1) && (
-            <text x={xFor(i)} y={H - 10} fontSize={10} fill="#94a3b8" textAnchor="middle">
+            <text x={xFor(i)} y={H - 10} fontSize={10} textAnchor="middle" className="fill-slate-400">
               {p.label}
             </text>
           )}
@@ -94,10 +97,25 @@ export function RadarChart({ data }: { data: { label: string; value: number | nu
   return (
     <svg
       viewBox={`${-padX} 0 ${size + padX * 2} ${size}`}
-      className="mx-auto w-full max-w-[420px]"
+      className="mx-auto w-full max-w-[420px] overflow-visible"
       role="img"
       aria-label="Radar de critérios"
     >
+      <defs>
+        <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#818cf8" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#6366f1" stopOpacity="0.1" />
+        </radialGradient>
+        <filter id="radarGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="2.5" result="b" />
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      {/* anéis da grade */}
       {rings.map((ring) => (
         <polygon
           key={ring}
@@ -106,27 +124,53 @@ export function RadarChart({ data }: { data: { label: string; value: number | nu
             .map(([x, y]) => `${x},${y}`)
             .join(' ')}
           fill="none"
-          stroke="#eef0f5"
           strokeWidth={1}
+          className="stroke-slate-200 dark:stroke-slate-700/70"
         />
       ))}
+      {/* raios */}
       {data.map((_, i) => {
         const [x, y] = pointFor(i, 10)
-        return <line key={i} x1={c} y1={c} x2={x} y2={y} stroke="#eef0f5" strokeWidth={1} />
+        return <line key={i} x1={c} y1={c} x2={x} y2={y} strokeWidth={1} className="stroke-slate-200 dark:stroke-slate-700/70" />
       })}
 
-      <polygon points={polygon} fill="#6366f1" fillOpacity={0.18} stroke="#4f46e5" strokeWidth={2} />
+      {/* área preenchida com glow */}
+      <polygon
+        points={polygon}
+        fill="url(#radarFill)"
+        stroke="#6366f1"
+        strokeWidth={2}
+        strokeLinejoin="round"
+        filter="url(#radarGlow)"
+      />
 
+      {/* pontos interativos (hover mostra a nota e aumenta o ponto) */}
       {data.map((d, i) => {
         const [x, y] = pointFor(i, d.value ?? 0)
-        return <circle key={i} cx={x} cy={y} r={3} fill="#4f46e5" />
+        return (
+          <g key={i} className="radar-pt">
+            <circle cx={x} cy={y} r={3.5} className="radar-dot fill-indigo-500 dark:fill-indigo-400" />
+            <circle cx={x} cy={y} r={14} fill="transparent" className="cursor-pointer">
+              <title>{`${d.label}: ${fmtScore(d.value)}`}</title>
+            </circle>
+          </g>
+        )
       })}
 
+      {/* rótulos */}
       {data.map((d, i) => {
         const [lx, ly] = pointFor(i, 11.6)
         const anchor = Math.abs(lx - c) < 14 ? 'middle' : lx > c ? 'start' : 'end'
         return (
-          <text key={i} x={lx} y={ly} fontSize={10} fill="#64748b" textAnchor={anchor} dominantBaseline="middle">
+          <text
+            key={i}
+            x={lx}
+            y={ly}
+            fontSize={10}
+            textAnchor={anchor}
+            dominantBaseline="middle"
+            className="fill-slate-500 dark:fill-slate-400"
+          >
             {d.label}
           </text>
         )
