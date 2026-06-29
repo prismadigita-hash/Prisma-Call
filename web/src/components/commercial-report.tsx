@@ -14,10 +14,10 @@ const MOMENTO_LABEL: Record<MomentoCompra, string> = {
 }
 
 const TEMP: Record<TemperaturaLead, { label: string; cls: string; emoji: string }> = {
-  frio: { label: 'Frio', cls: 'bg-sky-50 text-sky-700 ring-sky-200', emoji: '🧊' },
-  morno: { label: 'Morno', cls: 'bg-amber-50 text-amber-700 ring-amber-200', emoji: '🌤️' },
-  quente: { label: 'Quente', cls: 'bg-orange-50 text-orange-700 ring-orange-200', emoji: '🔥' },
-  muito_quente: { label: 'Muito quente', cls: 'bg-rose-50 text-rose-700 ring-rose-200', emoji: '🔥🔥' },
+  frio: { label: 'Frio', cls: 'bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/25', emoji: '🧊' },
+  morno: { label: 'Morno', cls: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/25', emoji: '🌤️' },
+  quente: { label: 'Quente', cls: 'bg-orange-50 text-orange-700 ring-orange-200 dark:bg-orange-500/10 dark:text-orange-300 dark:ring-orange-500/25', emoji: '🔥' },
+  muito_quente: { label: 'Muito quente', cls: 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/25', emoji: '🔥🔥' },
 }
 
 const RISCO_LABEL: Record<Nivel, string> = { baixo: 'Baixo', medio: 'Médio', alto: 'Alto' }
@@ -82,7 +82,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
             </p>
             <span className={cn('text-2xl font-bold tabular-nums', probText(prob))}>{prob}%</span>
           </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
             <div className={cn('h-full rounded-full', probColor(prob))} style={{ width: `${prob}%` }} />
           </div>
           {report.probabilidade_justificativa && (
@@ -102,7 +102,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
 
         {/* Sinais x objeções */}
         <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-xl bg-emerald-50/50 p-3 ring-1 ring-inset ring-emerald-100">
+          <div className="rounded-xl bg-emerald-50/50 p-3 ring-1 ring-inset ring-emerald-100 dark:bg-emerald-500/10 dark:ring-emerald-500/20">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">
               <ThumbsUp size={13} /> Sinais de compra
             </p>
@@ -116,7 +116,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
               </div>
             )}
           </div>
-          <div className="rounded-xl bg-rose-50/50 p-3 ring-1 ring-inset ring-rose-100">
+          <div className="rounded-xl bg-rose-50/50 p-3 ring-1 ring-inset ring-rose-100 dark:bg-rose-500/10 dark:ring-rose-500/20">
             <p className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-rose-700">
               <ShieldAlert size={13} /> Objeções / travas
             </p>
@@ -148,7 +148,7 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
         </div>
 
         {/* Próximo passo ideal */}
-        <div className="flex items-start gap-2 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 ring-1 ring-inset ring-indigo-100">
+        <div className="flex items-start gap-2 rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 ring-1 ring-inset ring-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-200 dark:ring-indigo-500/20">
           <ArrowRight size={16} className="mt-0.5 shrink-0 text-indigo-600" />
           <span><span className="font-semibold">Próximo passo ideal:</span> {report.proximo_passo_ideal}</span>
         </div>

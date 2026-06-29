@@ -53,6 +53,43 @@ export async function createCall(formData: FormData) {
   redirect(`/calls/${data.id}`)
 }
 
+/**
+ * Atualiza os dados "crus" de uma call (útil p/ calls vindas do Tactiq):
+ * Closer, cliente e data. Mantém a análise existente; só corrige a atribuição.
+ * Também sincroniza o closer_id das ações de melhoria dessa call (métricas).
+ */
+export async function updateCall(formData: FormData) {
+  const id = String(formData.get('id'))
+  const closer_id = String(formData.get('closer_id') ?? '').trim() || null
+  const client_name = String(formData.get('client_name') ?? '').trim()
+  const call_date = String(formData.get('call_date') ?? '').trim()
+
+  const patch: Record<string, string> = {}
+  if (closer_id) patch.closer_id = closer_id
+  if (client_name) patch.client_name = client_name
+  if (call_date) patch.call_date = call_date
+
+  if (Object.keys(patch).length === 0) return
+
+  const db = supabaseAdmin()
+  const { error } = await db.from('calls').update(patch).eq('id', id)
+  if (error) throw error
+
+  // Reatribui as ações de melhoria dessa call ao novo Closer (para a evolução)
+  if (closer_id) {
+    const { data: analyses } = await db.from('call_analyses').select('id').eq('call_id', id)
+    const ids = (analyses ?? []).map((a) => a.id)
+    if (ids.length) {
+      await db.from('improvement_actions').update({ closer_id }).in('analysis_id', ids)
+    }
+  }
+
+  revalidatePath(`/calls/${id}`)
+  revalidatePath('/calls')
+  revalidatePath('/')
+  if (closer_id) revalidatePath(`/closers/${closer_id}`)
+}
+
 export async function deleteCall(formData: FormData) {
   const id = String(formData.get('id'))
   const { error } = await supabaseAdmin().from('calls').delete().eq('id', id)

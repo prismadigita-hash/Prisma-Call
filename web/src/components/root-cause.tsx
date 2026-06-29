@@ -67,11 +67,11 @@ export function RootCausePanel({ rc }: { rc: RootCause }) {
         <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-3">
           <Block icon={<AlertTriangle size={13} className="text-amber-500" />} title="Sintoma">{rc.sintoma}</Block>
           <Block icon={<AlertTriangle size={13} className="text-slate-400" />} title="Causa aparente">{rc.causa_aparente}</Block>
-          <div className="rounded-xl bg-rose-50 p-3 ring-1 ring-inset ring-rose-100">
-            <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-rose-600">
+          <div className="rounded-xl bg-rose-50 p-3 ring-1 ring-inset ring-rose-100 dark:bg-rose-500/10 dark:ring-rose-500/20">
+            <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-300">
               <Crosshair size={13} /> Causa raiz
             </p>
-            <p className="text-sm font-medium leading-relaxed text-rose-900">{rc.causa_raiz}</p>
+            <p className="text-sm font-medium leading-relaxed text-rose-900 dark:text-rose-100">{rc.causa_raiz}</p>
           </div>
         </div>
 
@@ -119,8 +119,8 @@ export function RootCausePanel({ rc }: { rc: RootCause }) {
 
         {/* Mensagem recomendada */}
         {rc.mensagem_recomendada?.trim() && (
-          <div className="mb-5 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4">
-            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-600">
+          <div className="mb-5 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 dark:border-indigo-500/20 dark:bg-indigo-500/10">
+            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
               <MessageSquare size={13} /> Mensagem / fala recomendada
             </p>
             <p className="whitespace-pre-line text-sm italic leading-relaxed text-slate-800 dark:text-slate-200">“{rc.mensagem_recomendada}”</p>
@@ -128,7 +128,7 @@ export function RootCausePanel({ rc }: { rc: RootCause }) {
         )}
 
         {/* Próximo passo */}
-        <div className="flex items-start gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900 ring-1 ring-inset ring-emerald-100">
+        <div className="flex items-start gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-900 ring-1 ring-inset ring-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-200 dark:ring-emerald-500/20">
           <ArrowRight size={16} className="mt-0.5 shrink-0 text-emerald-600" />
           <span><span className="font-semibold">Próximo passo:</span> {rc.proximo_passo}</span>
         </div>

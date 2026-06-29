@@ -59,7 +59,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
         </div>
 
         {/* Final comment — the human, direct message */}
-        <Card className="mb-6 border-indigo-100 bg-indigo-50/40">
+        <Card className="mb-6 border-indigo-100 bg-indigo-50/40 dark:border-indigo-500/20 dark:bg-indigo-500/10">
           <CardBody>
             <div className="flex items-start gap-3">
               <Quote size={22} className="shrink-0 text-indigo-400" />
@@ -92,7 +92,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
 
         {/* Better approach — concrete rewrite */}
         {feedback.better_approach && (
-          <Card className="mb-6 border-amber-100 bg-amber-50/40">
+          <Card className="mb-6 border-amber-100 bg-amber-50/40 dark:border-amber-500/20 dark:bg-amber-500/10">
             <CardBody>
               <div className="flex items-start gap-3">
                 <Lightbulb size={20} className="shrink-0 text-amber-500" />
@@ -134,7 +134,7 @@ export default async function FeedbackPage({ params }: { params: Promise<{ id: s
                   const prio = PRIORITY[(a.priority as 1 | 2 | 3)] ?? PRIORITY[2]
                   const applied = a.status === 'aplicada'
                   return (
-                    <div key={a.id} className={`rounded-xl border p-3 ${applied ? 'border-emerald-200 bg-emerald-50/50' : 'border-border bg-white dark:bg-slate-900'}`}>
+                    <div key={a.id} className={`rounded-xl border p-3 ${applied ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-500/25 dark:bg-emerald-500/10' : 'border-border bg-white dark:bg-slate-900'}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">

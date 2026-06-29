@@ -23,10 +23,10 @@ export function scoreTone(score: number | null | undefined): {
     return { text: 'text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800', ring: 'ring-slate-200 dark:ring-slate-700', label: 'Sem nota' }
   }
   const s = Number(score)
-  if (s >= 8) return { text: 'text-emerald-700', bg: 'bg-emerald-50', ring: 'ring-emerald-200', label: 'Excelente' }
-  if (s >= 6.5) return { text: 'text-lime-700', bg: 'bg-lime-50', ring: 'ring-lime-200', label: 'Bom' }
-  if (s >= 5) return { text: 'text-amber-700', bg: 'bg-amber-50', ring: 'ring-amber-200', label: 'Regular' }
-  return { text: 'text-rose-700', bg: 'bg-rose-50', ring: 'ring-rose-200', label: 'Atenção' }
+  if (s >= 8) return { text: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-500/10', ring: 'ring-emerald-200 dark:ring-emerald-500/25', label: 'Excelente' }
+  if (s >= 6.5) return { text: 'text-lime-700 dark:text-lime-300', bg: 'bg-lime-50 dark:bg-lime-500/10', ring: 'ring-lime-200 dark:ring-lime-500/25', label: 'Bom' }
+  if (s >= 5) return { text: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-50 dark:bg-amber-500/10', ring: 'ring-amber-200 dark:ring-amber-500/25', label: 'Regular' }
+  return { text: 'text-rose-700 dark:text-rose-300', bg: 'bg-rose-50 dark:bg-rose-500/10', ring: 'ring-rose-200 dark:ring-rose-500/25', label: 'Atenção' }
 }
 
 /** Format an ISO/date string to dd/mm/yyyy (pt-BR). */
@@ -58,11 +58,11 @@ export const STATUS_LABELS: Record<string, string> = {
 }
 
 export const STATUS_TONE: Record<string, string> = {
-  recebida: 'bg-sky-50 text-sky-700 ring-sky-200',
-  pendente: 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-slate-200 dark:ring-slate-700',
-  em_analise: 'bg-amber-50 text-amber-700 ring-amber-200',
-  concluida: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  revisada: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
-  erro_na_analise: 'bg-rose-50 text-rose-700 ring-rose-200',
-  falhou: 'bg-rose-50 text-rose-700 ring-rose-200',
+  recebida: 'bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/25',
+  pendente: 'bg-slate-100 text-slate-600 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700',
+  em_analise: 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/25',
+  concluida: 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/25',
+  revisada: 'bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/25',
+  erro_na_analise: 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/25',
+  falhou: 'bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/25',
 }
