@@ -49,7 +49,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"transcricao\": {{ JSON.stringify($json.text) }},\n  \"titulo_da_call\": {{ JSON.stringify($('Google Drive Trigger').item.json.name) }},\n  \"data_da_call\": {{ JSON.stringify($('Google Drive Trigger').item.json.createdTime) }},\n  \"link_da_reuniao\": {{ JSON.stringify($('Google Drive Trigger').item.json.webViewLink) }},\n  \"closer\": \"\",\n  \"cliente\": \"\",\n  \"empresa\": \"\",\n  \"origem\": \"tactiq\"\n}",
+        "jsonBody": "={\n  \"transcricao\": {{ JSON.stringify($json.data) }},\n  \"titulo_da_call\": {{ JSON.stringify($('Google Drive Trigger').item.json.name) }},\n  \"data_da_call\": {{ JSON.stringify($('Google Drive Trigger').item.json.createdTime) }},\n  \"link_da_reuniao\": {{ JSON.stringify($('Google Drive Trigger').item.json.webViewLink) }},\n  \"closer\": \"\",\n  \"cliente\": \"\",\n  \"empresa\": \"\",\n  \"origem\": \"tactiq\"\n}",
         "options": {}
       },
       "id": "44444444-4444-4444-4444-444444444444",
