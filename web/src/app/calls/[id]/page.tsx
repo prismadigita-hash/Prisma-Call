@@ -16,8 +16,9 @@ import {
 import { PendingButton } from '@/components/pending-button'
 import { RadarChart, BarList } from '@/components/charts'
 import { CommercialReportPanel } from '@/components/commercial-report'
+import { ObjectionsMapPanel } from '@/components/objections-map'
 import { SetupBanner } from '@/components/setup-banner'
-import type { CommercialReport } from '@/lib/types'
+import type { CommercialReport, Objecao } from '@/lib/types'
 import { getFullAnalysis, listClosers } from '@/lib/data/queries'
 import { isAIEnabled } from '@/lib/ai/config'
 import { labelFor, shortLabelFor } from '@/lib/criteria'
@@ -49,6 +50,7 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
     const hasAnalysis = analysis?.status === 'concluida'
     const aiEnabled = isAIEnabled()
     const commercial = (analysis?.raw as { relatorio_comercial?: CommercialReport } | null)?.relatorio_comercial ?? null
+    const objecoes = (analysis?.raw as { objecoes?: Objecao[] } | null)?.objecoes ?? null
 
     const radar = scores.map((s) => ({ label: shortLabelFor(s.criterion_key), value: Number(s.score) }))
     const bars = [...scores]
@@ -248,6 +250,9 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
                 </CardBody>
               </Card>
             )}
+
+            {/* Mapa de objeções (skill Objeções) */}
+            {objecoes && <ObjectionsMapPanel objecoes={objecoes} />}
           </div>
         )}
 

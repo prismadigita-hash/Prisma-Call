@@ -1,5 +1,6 @@
 import { RUBRIC } from '@/lib/criteria'
 import { PRISMA_RCA_SKILL } from './skills/prisma-rca'
+import { OBJECOES_SKILL } from './skills/objecoes'
 
 const EVALUATOR_BASE = `Você é um head de vendas sênior, especialista em treinar Closers de alta performance.
 Sua tarefa é analisar a transcrição de uma call comercial e avaliar o desempenho do Closer
@@ -19,7 +20,7 @@ Regras inegociáveis:
 
 // O system prompt combina o avaliador de rubrica com a skill comercial Prisma
 // (análise de causa raiz para o setor de materiais de construção).
-export const SYSTEM_PROMPT = `${EVALUATOR_BASE}\n\n${PRISMA_RCA_SKILL}`
+export const SYSTEM_PROMPT = `${EVALUATOR_BASE}\n\n${PRISMA_RCA_SKILL}\n\n${OBJECOES_SKILL}`
 
 export function buildUserPrompt(input: {
   closerName: string
@@ -94,5 +95,15 @@ Analise a call e produza:
    - risco_de_perda_motivo: por que esse risco (ex.: "Cliente demonstrou interesse, mas o vendedor
      não conduziu o fechamento").
    - diagnostico_comercial_final: diagnóstico direto de gestor comercial — o cliente estava perto de
-     comprar? o vendedor aproveitou a oportunidade? principal erro/acerto comercial? o que fazer agora?`
+     comprar? o vendedor aproveitou a oportunidade? principal erro/acerto comercial? o que fazer agora?
+10. Um MAPA DE OBJEÇÕES (objecoes), aplicando a skill de Objeções. Para CADA objeção
+    que apareceu na transcrição (não invente; cite/parafraseie a fala do lead):
+    - fala_do_lead: o que o lead disse.
+    - tipo: prospeccao | red_herring | microcompromisso | compra.
+    - resposta_do_vendedor: como o vendedor reagiu (resuma).
+    - qualidade: boa | mediana | ruim.
+    - problema: o que houve de errado na resposta (ou "—" se foi boa).
+    - resposta_ideal: a resposta melhor, no tom do vendedor (validar → esclarecer →
+      reposicionar pela dor → pedir o próximo passo).
+    Se não houver objeções na call, retorne uma lista vazia.`
 }

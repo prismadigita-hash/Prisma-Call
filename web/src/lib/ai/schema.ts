@@ -14,6 +14,8 @@ const MOMENTOS_COMPRA = [
   'nao_identificado',
 ] as const
 const TEMPERATURAS = ['frio', 'morno', 'quente', 'muito_quente'] as const
+const TIPOS_OBJECAO = ['prospeccao', 'red_herring', 'microcompromisso', 'compra'] as const
+const QUALIDADES = ['boa', 'mediana', 'ruim'] as const
 const ETAPAS = [
   'anuncio',
   'lead',
@@ -85,6 +87,17 @@ export const aiRelatorioComercialSchema = z.object({
 
 export type AiRelatorioComercial = z.infer<typeof aiRelatorioComercialSchema>
 
+export const aiObjecaoSchema = z.object({
+  fala_do_lead: z.string(),
+  tipo: z.enum(TIPOS_OBJECAO),
+  resposta_do_vendedor: z.string(),
+  qualidade: z.enum(QUALIDADES),
+  problema: z.string(),
+  resposta_ideal: z.string(),
+})
+
+export type AiObjecao = z.infer<typeof aiObjecaoSchema>
+
 export const aiAnalysisSchema = z.object({
   summary: z.string(),
   overall_score: z.number().min(0).max(10),
@@ -103,6 +116,7 @@ export const aiAnalysisSchema = z.object({
   actions: z.array(aiActionSchema),
   root_cause: aiRootCauseSchema,
   relatorio_comercial: aiRelatorioComercialSchema,
+  objecoes: z.array(aiObjecaoSchema),
 })
 
 export type AiAnalysis = z.infer<typeof aiAnalysisSchema>
@@ -276,6 +290,23 @@ export const aiAnalysisGeminiSchema = {
         'diagnostico_comercial_final',
       ],
     },
+    objecoes: {
+      type: 'ARRAY',
+      description: 'Mapa de objeções da call. Lista vazia se não houver objeções.',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          fala_do_lead: { type: 'STRING' },
+          tipo: { type: 'STRING', enum: [...TIPOS_OBJECAO] },
+          resposta_do_vendedor: { type: 'STRING' },
+          qualidade: { type: 'STRING', enum: [...QUALIDADES] },
+          problema: { type: 'STRING' },
+          resposta_ideal: { type: 'STRING' },
+        },
+        required: ['fala_do_lead', 'tipo', 'resposta_do_vendedor', 'qualidade', 'problema', 'resposta_ideal'],
+        propertyOrdering: ['fala_do_lead', 'tipo', 'resposta_do_vendedor', 'qualidade', 'problema', 'resposta_ideal'],
+      },
+    },
   },
   required: [
     'summary',
@@ -288,6 +319,7 @@ export const aiAnalysisGeminiSchema = {
     'actions',
     'root_cause',
     'relatorio_comercial',
+    'objecoes',
   ],
   propertyOrdering: [
     'summary',
@@ -300,5 +332,6 @@ export const aiAnalysisGeminiSchema = {
     'actions',
     'root_cause',
     'relatorio_comercial',
+    'objecoes',
   ],
 } as const

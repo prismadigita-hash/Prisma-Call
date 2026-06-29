@@ -166,6 +166,19 @@ export interface CommercialReport {
   diagnostico_comercial_final: string
 }
 
+export type ObjecaoTipo = 'prospeccao' | 'red_herring' | 'microcompromisso' | 'compra'
+export type QualidadeResposta = 'boa' | 'mediana' | 'ruim'
+
+// Mapa de objeções (skill Objeções). Persistido em call_analyses.raw.objecoes.
+export interface Objecao {
+  fala_do_lead: string
+  tipo: ObjecaoTipo
+  resposta_do_vendedor: string
+  qualidade: QualidadeResposta
+  problema: string
+  resposta_ideal: string
+}
+
 export interface SlackLog {
   id: string
   call_id: string | null
