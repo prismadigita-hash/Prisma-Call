@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { analyzeCall } from '@/lib/ai/analyze'
 import { isAIEnabled, AI_DISABLED_MESSAGE } from '@/lib/ai/config'
-import { RUBRIC_VERSION } from '@/lib/criteria'
+import { RUBRIC_VERSION, weightedOverall } from '@/lib/criteria'
 import type { ActionStatus } from '@/lib/types'
 
 /**
@@ -54,12 +54,18 @@ export async function runAnalysis(callId: string): Promise<{ ok: boolean; error?
       transcript,
     })
 
+    // Nota geral = média ponderada das notas por critério (estável e coerente
+    // com o radar). Cai para a nota do modelo só se não houver scores.
+    const overall =
+      weightedOverall(ai.scores.map((s) => ({ criterion_key: s.criterion_key, score: s.score }))) ??
+      ai.overall_score
+
     // Persist the analysis core
     await db
       .from('call_analyses')
       .update({
         status: 'concluida',
-        overall_score: ai.overall_score,
+        overall_score: overall,
         summary: ai.summary,
         closer_talk_pct: ai.closer_talk_pct,
         client_talk_pct: ai.client_talk_pct,

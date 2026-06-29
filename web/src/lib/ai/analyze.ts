@@ -44,7 +44,13 @@ export async function analyzeCall(input: AnalyzeInput): Promise<AnalyzeResult> {
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: 'user', parts: [{ text: buildUserPrompt(input) }] }],
     generationConfig: {
-      temperature: 0.3,
+      // Consistência (mesma call -> mesma nota): temperatura 0 + seed fixo +
+      // "thinking" desligado (o raciocínio interno do 2.5-flash é a maior fonte
+      // de variação). Também deixa a análise mais rápida.
+      temperature: 0,
+      topP: 0.1,
+      seed: 7,
+      thinkingConfig: { thinkingBudget: 0 },
       responseMimeType: 'application/json',
       responseSchema: aiAnalysisGeminiSchema,
     },
