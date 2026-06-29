@@ -1,8 +1,14 @@
-import { CheckCircle2, XCircle, ExternalLink, Webhook } from 'lucide-react'
-import { PageHeader, Card, CardBody, SectionTitle, Pill } from '@/components/ui'
+import { CheckCircle2, XCircle, ExternalLink, Webhook, UserPlus, Users, AlertCircle } from 'lucide-react'
+import { PageHeader, Card, CardBody, SectionTitle, Pill, SubmitButton } from '@/components/ui'
 import { CopyField } from '@/components/copy-field'
+import { createAuthUser } from '@/lib/actions/users'
+import { supabaseAdmin } from '@/lib/supabase/admin'
+import { fmtDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+
+const inputCls =
+  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100'
 
 function ConfigRow({ ok, label, hint }: { ok: boolean; label: string; hint: string }) {
   return (
@@ -19,7 +25,13 @@ function ConfigRow({ ok, label, hint }: { ok: boolean; label: string; hint: stri
   )
 }
 
-export default function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ user_ok?: string; user_error?: string }>
+}) {
+  const sp = await searchParams
+
   const cfg = {
     supabaseUrl: Boolean(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL),
     supabaseService: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
@@ -29,6 +41,15 @@ export default function SettingsPage() {
   const appUrl = (process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000').replace(/\/$/, '')
   const tactiqUrl = `${appUrl}/api/webhooks/tactiq`
   const secretSet = Boolean(process.env.TACTIQ_WEBHOOK_SECRET)
+
+  // Lista de usuários (Supabase Auth) — best-effort (precisa do service_role)
+  let users: { id: string; email: string; created_at?: string }[] = []
+  try {
+    const { data } = await supabaseAdmin().auth.admin.listUsers()
+    users = (data?.users ?? []).map((u) => ({ id: u.id, email: u.email ?? '(sem e-mail)', created_at: u.created_at }))
+  } catch {
+    // sem service_role / erro -> mantém lista vazia
+  }
 
   return (
     <>
@@ -74,6 +95,66 @@ export default function SettingsPage() {
             </ol>
             <p className="mt-2">Passo a passo completo (Tactiq + Zapier/Make) no <code className="rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200 px-1">README.md</code>.</p>
           </div>
+        </CardBody>
+      </Card>
+
+      {/* Usuários do sistema */}
+      <Card className="mb-6">
+        <CardBody>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+              <Users size={18} />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">Usuários do sistema</h2>
+              <p className="text-sm text-slate-500">Crie acessos (e-mail + senha) para outras pessoas entrarem</p>
+            </div>
+            <Pill tone="slate">{users.length} usuário{users.length === 1 ? '' : 's'}</Pill>
+          </div>
+
+          {sp.user_ok && (
+            <div className="mb-4 flex items-start gap-2 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/25">
+              <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> {sp.user_ok}
+            </div>
+          )}
+          {sp.user_error && (
+            <div className="mb-4 flex items-start gap-2 rounded-xl bg-rose-50 p-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/25">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" /> {sp.user_error}
+            </div>
+          )}
+
+          <form action={createAuthUser} className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+            <div className="sm:col-span-1">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Nome (opcional)</label>
+              <input name="full_name" className={inputCls} placeholder="Ex: João Silva" />
+            </div>
+            <div className="sm:col-span-1">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">E-mail *</label>
+              <input name="email" type="email" required className={inputCls} placeholder="pessoa@empresa.com" />
+            </div>
+            <div className="sm:col-span-1">
+              <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Senha *</label>
+              <input name="password" type="text" required minLength={6} className={inputCls} placeholder="mín. 6 caracteres" />
+            </div>
+            <div className="flex items-end sm:col-span-1">
+              <SubmitButton className="w-full"><UserPlus size={16} /> Criar acesso</SubmitButton>
+            </div>
+          </form>
+
+          {users.length > 0 && (
+            <div className="mt-4 divide-y divide-border rounded-xl border border-border">
+              {users.map((u) => (
+                <div key={u.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
+                  <span className="truncate text-slate-700 dark:text-slate-200">{u.email}</span>
+                  <span className="shrink-0 text-xs text-slate-400">{fmtDate(u.created_at)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className="mt-3 text-xs text-slate-400">
+            A conta já vem confirmada — a pessoa entra direto em <code className="rounded bg-slate-100 px-1 dark:bg-slate-800">/login</code> com o e-mail e a senha.
+          </p>
         </CardBody>
       </Card>
 
