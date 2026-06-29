@@ -161,6 +161,7 @@ export interface CommercialReport {
   sinais_de_compra: string[]
   objecoes_ou_travas: string[]
   proximo_passo_ideal: string
+  data_proximo_passo: string
   risco_de_perda: Nivel
   risco_de_perda_motivo: string
   diagnostico_comercial_final: string

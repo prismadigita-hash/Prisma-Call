@@ -91,6 +91,9 @@ Analise a call e produza:
      concorrente, falta de urgência, falta de informação, vendedor não conduziu, não identificado).
    - proximo_passo_ideal: a ação comercial mais correta após a call (ex.: enviar orçamento,
      confirmar forma de pagamento, tentar fechamento direto, mandar prova social, ligar novamente).
+   - data_proximo_passo: se na transcrição ficou MARCADO um próximo passo/reunião com data ou
+     horário (ex.: "terça às 15h", "amanhã 10h", "dia 15"), extraia exatamente o que foi combinado.
+     Se NADA foi agendado na call, retorne exatamente "não identificado na conversa".
    - risco_de_perda: baixo | medio | alto.
    - risco_de_perda_motivo: por que esse risco (ex.: "Cliente demonstrou interesse, mas o vendedor
      não conduziu o fechamento").

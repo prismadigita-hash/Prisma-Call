@@ -1,4 +1,4 @@
-import { Briefcase, TrendingUp, ThumbsUp, ShieldAlert, ArrowRight, User, FileText } from 'lucide-react'
+import { Briefcase, TrendingUp, ThumbsUp, ShieldAlert, ArrowRight, User, FileText, CalendarClock } from 'lucide-react'
 import { Card, CardBody, Pill } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { CommercialReport, MomentoCompra, TemperaturaLead, Nivel } from '@/lib/types'
@@ -50,6 +50,8 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
 export function CommercialReportPanel({ report }: { report: CommercialReport }) {
   const temp = TEMP[report.temperatura_do_lead] ?? TEMP.frio
   const prob = Math.max(0, Math.min(100, report.probabilidade_estimada_de_fechamento))
+  const dataPasso = (report.data_proximo_passo ?? '').trim()
+  const agendado = dataPasso.length > 0 && !/n[ãa]o identificad/i.test(dataPasso)
 
   return (
     <Card className="border-slate-200 dark:border-slate-700">
@@ -71,6 +73,19 @@ export function CommercialReportPanel({ report }: { report: CommercialReport }) 
             </span>
             <Pill tone="indigo">{MOMENTO_LABEL[report.momento_de_compra] ?? report.momento_de_compra}</Pill>
             <Pill tone={riscoTone(report.risco_de_perda)}>Risco de perda: {RISCO_LABEL[report.risco_de_perda]}</Pill>
+            {agendado ? (
+              <Pill tone="emerald">
+                <span className="inline-flex items-center gap-1">
+                  <CalendarClock size={12} /> Próximo passo: {dataPasso}
+                </span>
+              </Pill>
+            ) : (
+              <Pill tone="amber">
+                <span className="inline-flex items-center gap-1">
+                  <CalendarClock size={12} /> Sem data marcada
+                </span>
+              </Pill>
+            )}
           </div>
         </div>
 
