@@ -5,6 +5,7 @@ import { SetupBanner } from '@/components/setup-banner'
 import { listClosers } from '@/lib/data/queries'
 import { getDashboardMetrics } from '@/lib/data/metrics'
 import { createCloser } from '@/lib/actions/closers'
+import { isAdmin } from '@/lib/auth/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,11 @@ const inputCls =
 
 export default async function ClosersPage() {
   try {
-    const [closers, metrics] = await Promise.all([listClosers(), getDashboardMetrics()])
+    const [closers, metrics, admin] = await Promise.all([
+      listClosers(),
+      getDashboardMetrics(),
+      isAdmin(),
+    ])
 
     return (
       <>
@@ -21,7 +26,7 @@ export default async function ClosersPage() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* List */}
-          <div className="lg:col-span-2">
+          <div className={admin ? 'lg:col-span-2' : 'lg:col-span-3'}>
             <Card>
               <CardBody>
                 <SectionTitle title={`${closers.length} Closers`} />
@@ -51,7 +56,8 @@ export default async function ClosersPage() {
             </Card>
           </div>
 
-          {/* Create form */}
+          {/* Create form — apenas para o admin */}
+          {admin && (
           <div>
             <Card>
               <CardBody>
@@ -76,6 +82,7 @@ export default async function ClosersPage() {
               </CardBody>
             </Card>
           </div>
+          )}
         </div>
       </>
     )

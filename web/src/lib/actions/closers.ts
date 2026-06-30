@@ -3,8 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth/admin'
 
 export async function createCloser(formData: FormData) {
+  await requireAdmin() // só o admin pode cadastrar Closer
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim() || null
   const role = String(formData.get('role') ?? '').trim() || 'Closer'
@@ -24,6 +26,7 @@ export async function createCloser(formData: FormData) {
  * todas as calls, análises, notas e feedbacks vinculados a esse Closer.
  */
 export async function deleteCloser(formData: FormData) {
+  await requireAdmin() // só o admin pode excluir Closer
   const id = String(formData.get('id'))
   const { error } = await supabaseAdmin().from('closers').delete().eq('id', id)
   if (error) throw error

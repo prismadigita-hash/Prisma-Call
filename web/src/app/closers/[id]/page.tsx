@@ -18,6 +18,7 @@ import { LineChart, RadarChart } from '@/components/charts'
 import { ConfirmButton } from '@/components/confirm-button'
 import { SetupBanner } from '@/components/setup-banner'
 import { deleteCloser } from '@/lib/actions/closers'
+import { isAdmin } from '@/lib/auth/admin'
 import { Trash2 } from 'lucide-react'
 import { shortLabelFor } from '@/lib/criteria'
 import { getCloser, listCalls } from '@/lib/data/queries'
@@ -32,10 +33,11 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
     const closer = await getCloser(id)
     if (!closer) notFound()
 
-    const [evolution, applied, calls] = await Promise.all([
+    const [evolution, applied, calls, admin] = await Promise.all([
       getCloserEvolution(id),
       countAppliedActions(id),
       listCalls({ closerId: id }),
+      isAdmin(),
     ])
 
     const criterionAvg = (key: string) =>
@@ -53,12 +55,14 @@ export default async function CloserPage({ params }: { params: Promise<{ id: str
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{closer.name}</h1>
             <p className="text-sm text-slate-500">{closer.role ?? 'Closer'}{closer.email ? ` · ${closer.email}` : ''}</p>
           </div>
-          <form action={deleteCloser}>
-            <input type="hidden" name="id" value={closer.id} />
-            <ConfirmButton confirmMessage={`Excluir o Closer "${closer.name}"? Isso também apaga TODAS as calls e análises dele. Esta ação não pode ser desfeita.`}>
-              <Trash2 size={16} /> Excluir Closer
-            </ConfirmButton>
-          </form>
+          {admin && (
+            <form action={deleteCloser}>
+              <input type="hidden" name="id" value={closer.id} />
+              <ConfirmButton confirmMessage={`Excluir o Closer "${closer.name}"? Isso também apaga TODAS as calls e análises dele. Esta ação não pode ser desfeita.`}>
+                <Trash2 size={16} /> Excluir Closer
+              </ConfirmButton>
+            </form>
+          )}
         </div>
 
         {/* KPIs */}
