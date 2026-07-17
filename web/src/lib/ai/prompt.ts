@@ -47,6 +47,10 @@ ${input.transcript}
 
 # Tarefa
 Analise a call e produza:
+0. Um título curto para a call (call_title): o nome da EMPRESA do cliente e/ou o nome da
+   PESSOA, extraído da transcrição (ex: "Metalúrgica Silva — João"). NÃO invente nomes;
+   use somente o que aparece na conversa. Máx. 60 caracteres. Se não for possível
+   identificar, retorne exatamente "não identificado".
 1. Um resumo geral (summary).
 2. A nota geral de 0 a 10 (overall_score), coerente com as notas por critério.
 3. Estimativa do tempo de fala do Closer e do cliente (devem somar ~100).

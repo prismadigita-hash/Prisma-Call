@@ -13,7 +13,10 @@ import type { ActionStatus } from '@/lib/types'
  *   → update statuses.
  * Keeps a single current analysis per call (old ones are replaced).
  */
-export async function runAnalysis(callId: string): Promise<{ ok: boolean; error?: string }> {
+export async function runAnalysis(
+  callId: string,
+  opts: { autoRename?: boolean } = {},
+): Promise<{ ok: boolean; error?: string }> {
   // Manual mode: no AI key configured. Don't touch statuses; just report back.
   if (!isAIEnabled()) {
     return { ok: false, error: AI_DISABLED_MESSAGE }
@@ -59,6 +62,21 @@ export async function runAnalysis(callId: string): Promise<{ ok: boolean; error?
     const overall =
       weightedOverall(ai.scores.map((s) => ({ criterion_key: s.criterion_key, score: s.score }))) ??
       ai.overall_score
+
+    // Auto-nomeação: se a IA identificou empresa/pessoa na transcrição, renomeia a
+    // call. Com opts.autoRename (webhook: call recém-transcrita) renomeia sempre;
+    // sem a flag (re-análise manual) só quando o nome atual é genérico/automático,
+    // para não sobrescrever um nome que alguém digitou à mão.
+    const aiTitle = (ai.call_title ?? '').trim()
+    const hasAiTitle = aiTitle && aiTitle.toLowerCase() !== 'não identificado' && aiTitle.length <= 80
+    const currentName = (call.client_name ?? '').trim()
+    const genericName =
+      !currentName ||
+      /^cliente n[aã]o informado$/i.test(currentName) ||
+      /^(meeting|meet\b|reuni[aã]o|gravação|call\b|transcri|notas d)/i.test(currentName)
+    if (hasAiTitle && (opts.autoRename || genericName) && aiTitle !== currentName) {
+      await db.from('calls').update({ client_name: aiTitle }).eq('id', callId)
+    }
 
     // Persist the analysis core
     await db

@@ -27,7 +27,7 @@ export default async function DashboardPage() {
     const [closers, metrics, calls] = await Promise.all([
       listClosers(),
       getDashboardMetrics(),
-      listCalls(),
+      listCalls({ limit: 12 }),
     ])
 
     const ranking = closers

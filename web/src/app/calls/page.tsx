@@ -25,7 +25,7 @@ export default async function CallsPage({
 
     return (
       <>
-        <AutoRefresh seconds={15} />
+        <AutoRefresh seconds={30} />
         <PageHeader
           title="Calls"
           subtitle="Todas as calls cadastradas e seus status de análise"

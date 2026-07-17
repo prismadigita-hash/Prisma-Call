@@ -6,7 +6,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/auth/admin'
 
 export async function createCloser(formData: FormData) {
-  await requireAdmin() // só o admin pode cadastrar Closer
+  // Qualquer usuário logado pode cadastrar Closer (o app inteiro já exige login).
+  // A exclusão continua restrita ao admin (deleteCloser) por ser destrutiva.
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim() || null
   const role = String(formData.get('role') ?? '').trim() || 'Closer'

@@ -148,8 +148,9 @@ export async function POST(request: Request) {
     })
   }
 
-  // 6) Disparar análise (persiste resultado + Slack acontecem dentro de runAnalysis)
-  const result = await runAnalysis(callId)
+  // 6) Disparar análise (persiste resultado + Slack acontecem dentro de runAnalysis).
+  // autoRename: call recém-transcrita ganha o nome extraído da transcrição pela IA.
+  const result = await runAnalysis(callId, { autoRename: true })
 
   if (!result.ok) {
     // 7) Falha na análise: manter call salva com status "erro_na_analise" + log

@@ -100,6 +100,7 @@ export const aiObjecaoSchema = z.object({
 export type AiObjecao = z.infer<typeof aiObjecaoSchema>
 
 export const aiAnalysisSchema = z.object({
+  call_title: z.string().optional().default(''),
   summary: z.string(),
   overall_score: z.number().min(0).max(10),
   closer_talk_pct: z.number().int().min(0).max(100),
@@ -130,6 +131,11 @@ export type AiAnalysis = z.infer<typeof aiAnalysisSchema>
 export const aiAnalysisGeminiSchema = {
   type: 'OBJECT',
   properties: {
+    call_title: {
+      type: 'STRING',
+      description:
+        'Nome curto para identificar a call, extraído da transcrição: nome da EMPRESA do cliente e/ou nome da PESSOA (ex: "Metalúrgica Silva — João" ou "Maria (Construtora MP)"). Máx. 60 caracteres. Se não der para identificar empresa nem pessoa, retorne exatamente "não identificado".',
+    },
     summary: { type: 'STRING', description: 'Resumo geral da call em 3-5 frases.' },
     overall_score: { type: 'NUMBER', description: 'Nota geral de 0 a 10.' },
     closer_talk_pct: { type: 'INTEGER', description: '% de tempo de fala do Closer (0-100).' },
@@ -317,6 +323,7 @@ export const aiAnalysisGeminiSchema = {
     },
   },
   required: [
+    'call_title',
     'summary',
     'overall_score',
     'closer_talk_pct',
@@ -330,6 +337,7 @@ export const aiAnalysisGeminiSchema = {
     'objecoes',
   ],
   propertyOrdering: [
+    'call_title',
     'summary',
     'overall_score',
     'closer_talk_pct',

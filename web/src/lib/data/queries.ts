@@ -52,13 +52,21 @@ export interface CallFilters {
   status?: string
   from?: string
   to?: string
+  /** Máx. de linhas retornadas (proteção de performance nas listagens). */
+  limit?: number
 }
+
+// Colunas usadas nas listagens — NUNCA buscar `transcript` aqui: é um texto
+// gigante por linha e deixava /calls e o dashboard lentos.
+const CALL_LIST_COLUMNS =
+  'id, closer_id, client_name, call_date, source, recording_url, status, duration_sec, created_at, updated_at'
 
 export async function listCalls(filters: CallFilters = {}): Promise<CallWithCloser[]> {
   let q = supabaseAdmin()
     .from('calls')
-    .select('*, closer:closers(id, name, avatar_url), call_analyses(overall_score, status)')
+    .select(`${CALL_LIST_COLUMNS}, closer:closers(id, name, avatar_url), call_analyses(overall_score, status)`)
     .order('call_date', { ascending: false })
+    .limit(filters.limit ?? 200)
 
   if (filters.closerId) q = q.eq('closer_id', filters.closerId)
   if (filters.status) q = q.eq('status', filters.status)
@@ -75,6 +83,7 @@ export async function listCalls(filters: CallFilters = {}): Promise<CallWithClos
     void _omit
     return {
       ...(call as unknown as Call),
+      transcript: null, // não carregado na listagem (ver CALL_LIST_COLUMNS)
       closer: row.closer as CallWithCloser['closer'],
       overall_score: latest?.overall_score ?? null,
     }
@@ -105,8 +114,7 @@ export async function getFullAnalysis(callId: string): Promise<FullAnalysis | nu
   const call = await getCall(callId)
   if (!call) return null
 
-  const closer = await getCloser(call.closer_id)
-  const analysis = await getLatestAnalysis(callId)
+  const [closer, analysis] = await Promise.all([getCloser(call.closer_id), getLatestAnalysis(callId)])
 
   if (!analysis) {
     return { call, closer, analysis: null, scores: [], highlights: [], feedback: null, actions: [] }
