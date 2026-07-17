@@ -27,9 +27,9 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-white dark:bg-slate-900 px-3 py-5 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-white/85 dark:bg-slate-900/60 px-3 py-5 md:flex">
       <Link href="/" className="mb-8 flex items-center gap-2.5 px-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-[0_4px_16px_-4px_rgba(99,102,241,0.6)]">
           <Sparkles size={18} />
         </div>
         <div className="leading-tight">
@@ -47,13 +47,16 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition',
+                'relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition',
                 active
-                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300 dark:ring-1 dark:ring-inset dark:ring-indigo-500/20'
+                  ? 'bg-gradient-to-r from-indigo-50 to-sky-50/60 text-indigo-700 ring-1 ring-inset ring-indigo-100 dark:from-indigo-500/15 dark:to-sky-500/10 dark:text-indigo-300 dark:ring-indigo-500/20 dark:shadow-[0_0_18px_-8px_rgba(99,102,241,0.6)]'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
               )}
             >
-              <Icon size={18} className={active ? 'text-indigo-600' : 'text-slate-400'} />
+              {active && (
+                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gradient-to-b from-indigo-400 to-violet-500" />
+              )}
+              <Icon size={18} className={active ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-400'} />
               {item.label}
             </Link>
           )
@@ -79,7 +82,7 @@ export function Sidebar() {
 export function MobileNav() {
   const pathname = usePathname()
   return (
-    <nav className="flex items-center gap-1 overflow-x-auto border-b border-border bg-white dark:bg-slate-900 px-2 py-2 md:hidden">
+    <nav className="flex items-center gap-1 overflow-x-auto border-b border-border bg-white/85 dark:bg-slate-900/60 px-2 py-2 md:hidden">
       {NAV.map((item) => {
         const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
         const Icon = item.icon
@@ -89,7 +92,9 @@ export function MobileNav() {
             href={item.href}
             className={cn(
               'flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium',
-              active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500',
+              active
+                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+                : 'text-slate-500 dark:text-slate-400',
             )}
           >
             <Icon size={15} />

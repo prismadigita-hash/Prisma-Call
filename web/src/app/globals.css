@@ -39,28 +39,63 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Fundo futurista do modo escuro: degradê azul (preto -> azul) + aurora animada */
-.dark body {
-  background: linear-gradient(170deg, #060912 0%, #081024 48%, #0a1430 100%);
-  background-attachment: fixed;
+/* ---------------------------------------------------------------------------
+   Fundo futurista — os dois temas ganham um degradê + aurora animada.
+   Perf: só radial-gradients (já suaves, sem filter: blur) e animação
+   exclusivamente de transform/opacity numa camada fixa própria (GPU).
+--------------------------------------------------------------------------- */
+body {
   position: relative;
+  background-attachment: fixed;
 }
 
-/* Camada de "aurora" azul que se move lentamente atrás de tudo */
-.dark body::before {
+/* Light: base clara com leve profundidade azulada */
+body {
+  background-image: linear-gradient(170deg, #f7f8fc 0%, #f3f5fb 55%, #eef2fa 100%);
+}
+
+/* Dark: preto-azulado profundo */
+.dark body {
+  background-image: linear-gradient(170deg, #060912 0%, #081024 48%, #0a1430 100%);
+}
+
+/* Aurora — camada animada atrás de tudo (um único pseudo-elemento composto) */
+body::before {
   content: '';
   position: fixed;
   inset: -15%;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
-  /* gradientes radiais já são suaves -> sem filter: blur (pesado para a GPU) */
   background:
-    radial-gradient(38% 38% at 20% 18%, rgba(56, 189, 248, 0.14), transparent 60%),
-    radial-gradient(42% 42% at 82% 22%, rgba(99, 102, 241, 0.18), transparent 60%),
-    radial-gradient(38% 38% at 55% 105%, rgba(37, 99, 235, 0.14), transparent 60%);
+    radial-gradient(38% 38% at 20% 18%, rgba(56, 189, 248, 0.09), transparent 60%),
+    radial-gradient(42% 42% at 82% 22%, rgba(99, 102, 241, 0.1), transparent 60%),
+    radial-gradient(38% 38% at 55% 105%, rgba(37, 99, 235, 0.08), transparent 60%);
   will-change: transform;
   transform: translateZ(0);
   animation: aurora 22s ease-in-out infinite alternate;
+}
+
+.dark body::before {
+  background:
+    radial-gradient(38% 38% at 20% 18%, rgba(56, 189, 248, 0.16), transparent 60%),
+    radial-gradient(42% 42% at 82% 22%, rgba(99, 102, 241, 0.2), transparent 60%),
+    radial-gradient(34% 34% at 12% 78%, rgba(168, 85, 247, 0.08), transparent 60%),
+    radial-gradient(38% 38% at 55% 105%, rgba(37, 99, 235, 0.16), transparent 60%);
+}
+
+/* Grid técnico estático (sem animação = custo ~zero) com máscara radial */
+.dark body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(75% 60% at 50% 32%, #000 0%, transparent 100%);
+  mask-image: radial-gradient(75% 60% at 50% 32%, #000 0%, transparent 100%);
 }
 
 @keyframes aurora {
@@ -78,9 +113,50 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Micro-animações de entrada e skeleton shimmer
+--------------------------------------------------------------------------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.3s ease-out both;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    100deg,
+    rgba(148, 163, 184, 0.12) 40%,
+    rgba(148, 163, 184, 0.26) 50%,
+    rgba(148, 163, 184, 0.12) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
 /* Acessibilidade: sem animação para quem prefere movimento reduzido */
 @media (prefers-reduced-motion: reduce) {
-  .dark body::before {
+  body::before,
+  .fade-up,
+  .skeleton {
     animation: none;
   }
 }
@@ -93,12 +169,22 @@ button {
     color 0.15s ease,
     border-color 0.15s ease,
     box-shadow 0.15s ease,
-    transform 0.15s ease;
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.98);
 }
 
 ::selection {
   background: rgba(99, 102, 241, 0.32);
   color: #fff;
+}
+
+/* Barras de score: preenchimento animado */
+.scorebar-fill {
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Gráficos: pontos crescem ao passar o mouse (interatividade) */

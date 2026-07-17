@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   // Não revelar a tecnologia do servidor
   poweredByHeader: false,
+  experimental: {
+    // Navegação instantânea: reusa a página no cliente por até 30s (o
+    // AutoRefresh continua atualizando os dados por trás).
+    staleTimes: { dynamic: 30, static: 180 },
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },

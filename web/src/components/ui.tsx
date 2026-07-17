@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { Inbox } from 'lucide-react'
 import { cn, fmtScore, scoreTone, initials, STATUS_LABELS, STATUS_TONE } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -7,7 +8,15 @@ import { cn, fmtScore, scoreTone, initials, STATUS_LABELS, STATUS_TONE } from '@
 // ---------------------------------------------------------------------------
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
   return (
-    <div className={cn('rounded-2xl border border-border bg-card shadow-sm', className)}>{children}</div>
+    <div
+      className={cn(
+        'rounded-2xl border border-border bg-card shadow-sm transition-shadow',
+        'hover:shadow-md dark:bg-card/80 dark:hover:shadow-[0_0_28px_-10px_rgba(99,102,241,0.45)]',
+        className,
+      )}
+    >
+      {children}
+    </div>
   )
 }
 
@@ -50,8 +59,10 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:bg-gradient-to-r dark:from-slate-50 dark:via-indigo-200 dark:to-slate-300 dark:bg-clip-text dark:text-transparent">
+          {title}
+        </h1>
+        {subtitle && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -102,7 +113,7 @@ export function ScoreBadge({ score, size = 'md' }: { score: number | null | unde
 export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-500/20 dark:text-indigo-200 font-semibold text-indigo-700"
+      className="flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-sky-100 font-semibold text-indigo-700 ring-1 ring-inset ring-indigo-200/60 dark:from-indigo-500/25 dark:to-sky-500/15 dark:text-indigo-200 dark:ring-indigo-400/25"
       style={{ width: size, height: size, fontSize: size * 0.38 }}
     >
       {initials(name)}
@@ -129,7 +140,7 @@ export function ScoreBar({ score }: { score: number | null }) {
   return (
     <div className="flex items-center gap-3">
       <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-        <div className={cn('h-full rounded-full', fill)} style={{ width: `${pct}%` }} />
+        <div className={cn('scorebar-fill h-full rounded-full', fill)} style={{ width: `${pct}%` }} />
       </div>
       <span className={cn('w-9 text-right text-sm font-semibold tabular-nums', tone.text)}>{fmtScore(score)}</span>
     </div>
@@ -163,7 +174,11 @@ export function StatCard({
             {hint && <span className="text-xs text-slate-400">{hint}</span>}
           </div>
         </div>
-        {icon && <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">{icon}</div>}
+        {icon && (
+          <div className="rounded-xl bg-gradient-to-br from-indigo-50 to-sky-50 p-2.5 text-indigo-600 ring-1 ring-inset ring-indigo-100 dark:from-indigo-500/20 dark:to-sky-500/10 dark:text-indigo-300 dark:ring-indigo-400/20 dark:shadow-[0_0_18px_-6px_rgba(99,102,241,0.55)]">
+            {icon}
+          </div>
+        )}
       </CardBody>
     </Card>
   )
@@ -175,7 +190,9 @@ export function TrendPill({ value }: { value: number }) {
     <span
       className={cn(
         'inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-semibold',
-        up ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700',
+        up
+          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
+          : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
       )}
     >
       {up ? '▲' : '▼'} {Math.abs(value).toFixed(1)}%
@@ -198,6 +215,9 @@ export function EmptyState({
   return (
     <Card>
       <CardBody className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+        <div className="mb-1 rounded-2xl bg-gradient-to-br from-indigo-50 to-sky-50 p-3 text-indigo-400 ring-1 ring-inset ring-indigo-100 dark:from-indigo-500/15 dark:to-sky-500/10 dark:text-indigo-300 dark:ring-indigo-400/20">
+          <Inbox size={22} />
+        </div>
         <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{title}</p>
         {description && <p className="max-w-md text-sm text-slate-500">{description}</p>}
         {action && <div className="mt-2">{action}</div>}
@@ -212,7 +232,8 @@ export function EmptyState({
 const btnBase =
   'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:opacity-50'
 const btnVariants = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm dark:shadow-[0_0_22px_-6px_rgba(99,102,241,0.65)]',
+  primary:
+    'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm hover:from-indigo-500 hover:to-violet-500 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-8px_rgba(99,102,241,0.7)] dark:shadow-[0_0_22px_-6px_rgba(99,102,241,0.65)]',
   secondary: 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 ring-1 ring-inset ring-slate-200 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800',
   ghost: 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
   danger: 'bg-rose-600 text-white hover:bg-rose-700',
