@@ -102,6 +102,38 @@ export async function POST(request: Request) {
   if (participantesStr) header.push(`Participantes: ${participantesStr}`)
   const fullTranscript = (header.length ? header.join('\n') + '\n\n' : '') + transcricao
 
+  // Idempotência: o Zapier/Make/n8n às vezes entrega o MESMO webhook 2x (retry),
+  // o que criava calls duplicadas. Se já existe uma call recente (48h) com a
+  // mesma transcrição, devolve a existente em vez de criar outra.
+  try {
+    const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    const { data: recent } = await db
+      .from('calls')
+      .select('id, transcript')
+      .eq('source', 'tactiq')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(30)
+    const dup = (recent ?? []).find((c) => c.transcript === fullTranscript)
+    if (dup) {
+      await db.from('webhook_logs').insert({
+        source: 'tactiq',
+        call_id: dup.id,
+        ok: true,
+        status: 'duplicada_ignorada',
+        payload: payload as unknown,
+      })
+      return json({
+        ok: true,
+        call_id: dup.id,
+        status: 'duplicada_ignorada',
+        message: 'Webhook duplicado: esta transcrição já foi recebida. Call existente reutilizada.',
+      })
+    }
+  } catch {
+    // Se a checagem de duplicata falhar, segue o fluxo normal (não bloqueia).
+  }
+
   let callId: string | null = null
   try {
     const closerId = await resolveCloserId(payload.closer)
