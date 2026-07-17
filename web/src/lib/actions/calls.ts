@@ -71,14 +71,18 @@ export async function updateCall(formData: FormData) {
 
   if (Object.keys(patch).length === 0) return
 
+  // Update da call e busca das análises rodam em PARALELO (menos ida-e-volta
+  // ao banco = salvar mais rápido).
   const db = supabaseAdmin()
-  const { error } = await db.from('calls').update(patch).eq('id', id)
-  if (error) throw error
+  const [updRes, analysesRes] = await Promise.all([
+    db.from('calls').update(patch).eq('id', id),
+    closer_id ? db.from('call_analyses').select('id').eq('call_id', id) : Promise.resolve({ data: null }),
+  ])
+  if (updRes.error) throw updRes.error
 
   // Reatribui as ações de melhoria dessa call ao novo Closer (para a evolução)
   if (closer_id) {
-    const { data: analyses } = await db.from('call_analyses').select('id').eq('call_id', id)
-    const ids = (analyses ?? []).map((a) => a.id)
+    const ids = (analysesRes.data ?? []).map((a: { id: string }) => a.id)
     if (ids.length) {
       await db.from('improvement_actions').update({ closer_id }).in('analysis_id', ids)
     }
