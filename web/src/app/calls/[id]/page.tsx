@@ -23,7 +23,8 @@ import { getFullAnalysis, listClosers } from '@/lib/data/queries'
 import { isAIEnabled } from '@/lib/ai/config'
 import { labelFor, shortLabelFor } from '@/lib/criteria'
 import { analyzeCallAction } from '@/lib/actions/analysis'
-import { markReviewed, updateCall, deleteCall } from '@/lib/actions/calls'
+import { markReviewed, deleteCall } from '@/lib/actions/calls'
+import { EditCallForm } from '@/components/edit-call-form'
 import { ConfirmButton } from '@/components/confirm-button'
 import { fmtScore, fmtDate } from '@/lib/utils'
 
@@ -45,8 +46,6 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
 
     const { call, closer, analysis, scores, highlights } = data
     const closers = await listClosers()
-    const inputCls =
-      'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100'
     const hasAnalysis = analysis?.status === 'concluida'
     const aiEnabled = isAIEnabled()
     const commercial = (analysis?.raw as { relatorio_comercial?: CommercialReport } | null)?.relatorio_comercial ?? null
@@ -122,29 +121,13 @@ export default async function CallAnalysisPage({ params }: { params: Promise<{ i
               <summary className="cursor-pointer select-none text-sm font-semibold text-slate-700 dark:text-slate-200">
                 Editar dados da call (Closer, cliente, data)
               </summary>
-              <form action={updateCall} className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <input type="hidden" name="id" value={call.id} />
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Closer</label>
-                  <select name="closer_id" defaultValue={call.closer_id ?? ''} className={inputCls}>
-                    <option value="">Selecione…</option>
-                    {closers.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Cliente / Lead</label>
-                  <input name="client_name" defaultValue={call.client_name} className={inputCls} />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">Data da call</label>
-                  <input type="date" name="call_date" defaultValue={call.call_date} className={inputCls} />
-                </div>
-                <div className="sm:col-span-3">
-                  <PendingButton variant="secondary" pendingText="Salvando…">Salvar dados</PendingButton>
-                </div>
-              </form>
+              <EditCallForm
+                callId={call.id}
+                closerId={call.closer_id}
+                clientName={call.client_name}
+                callDate={call.call_date}
+                closers={closers.map((c) => ({ id: c.id, name: c.name }))}
+              />
             </details>
           </CardBody>
         </Card>

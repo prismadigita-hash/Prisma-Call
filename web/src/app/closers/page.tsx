@@ -1,15 +1,12 @@
 import Link from 'next/link'
 import { UserPlus } from 'lucide-react'
-import { PageHeader, Card, CardBody, SectionTitle, Avatar, ScoreBar, TrendPill, SubmitButton } from '@/components/ui'
+import { PageHeader, Card, CardBody, SectionTitle, Avatar, ScoreBar, TrendPill, SubmitButton, inputCls } from '@/components/ui'
 import { SetupBanner } from '@/components/setup-banner'
 import { listClosers } from '@/lib/data/queries'
 import { getDashboardMetrics } from '@/lib/data/metrics'
 import { createCloser } from '@/lib/actions/closers'
 
 export const dynamic = 'force-dynamic'
-
-const inputCls =
-  'w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100'
 
 export default async function ClosersPage() {
   try {

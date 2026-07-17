@@ -3,6 +3,10 @@ import type { ReactNode } from 'react'
 import { Inbox } from 'lucide-react'
 import { cn, fmtScore, scoreTone, initials, STATUS_LABELS, STATUS_TONE } from '@/lib/utils'
 
+// Classe única para inputs/selects de todo o sistema (importada pelas telas).
+export const inputCls =
+  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-400 dark:focus:ring-indigo-500/25'
+
 // ---------------------------------------------------------------------------
 // Card
 // ---------------------------------------------------------------------------
@@ -72,14 +76,24 @@ export function PageHeader({
 // ---------------------------------------------------------------------------
 // Badges
 // ---------------------------------------------------------------------------
+const STATUS_DOT: Record<string, string> = {
+  recebida: 'bg-sky-500',
+  pendente: 'bg-amber-500',
+  em_analise: 'bg-indigo-500 animate-pulse',
+  concluida: 'bg-emerald-500',
+  revisada: 'bg-violet-500',
+  erro_na_analise: 'bg-rose-500',
+}
+
 export function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset',
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset',
         STATUS_TONE[status] ?? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 ring-slate-200 dark:ring-slate-700',
       )}
     >
+      <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', STATUS_DOT[status] ?? 'bg-slate-400')} />
       {STATUS_LABELS[status] ?? status}
     </span>
   )

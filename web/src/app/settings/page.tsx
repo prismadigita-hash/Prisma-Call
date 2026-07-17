@@ -1,14 +1,11 @@
 import { CheckCircle2, XCircle, ExternalLink, Webhook, UserPlus, Users, AlertCircle } from 'lucide-react'
-import { PageHeader, Card, CardBody, SectionTitle, Pill, SubmitButton } from '@/components/ui'
+import { PageHeader, Card, CardBody, SectionTitle, Pill, SubmitButton, inputCls } from '@/components/ui'
 import { CopyField } from '@/components/copy-field'
 import { createAuthUser } from '@/lib/actions/users'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { fmtDate } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
-
-const inputCls =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100'
 
 function ConfigRow({ ok, label, hint }: { ok: boolean; label: string; hint: string }) {
   return (

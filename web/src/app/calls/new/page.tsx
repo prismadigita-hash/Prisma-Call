@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, Upload } from 'lucide-react'
-import { PageHeader, Card, CardBody, SectionTitle } from '@/components/ui'
+import { PageHeader, Card, CardBody, SectionTitle, inputCls } from '@/components/ui'
 import { PendingButton } from '@/components/pending-button'
 import { SetupBanner } from '@/components/setup-banner'
 import { listClosers } from '@/lib/data/queries'
@@ -8,9 +8,6 @@ import { createCall } from '@/lib/actions/calls'
 import { isAIEnabled } from '@/lib/ai/config'
 
 export const dynamic = 'force-dynamic'
-
-const inputCls =
-  'w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100'
 
 export default async function NewCallPage() {
   let closers
