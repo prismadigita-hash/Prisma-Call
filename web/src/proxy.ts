@@ -45,8 +45,17 @@ export async function proxy(request: NextRequest) {
     return response
   }
 
-  // Não logado e tentando acessar área protegida -> manda pro login
+  // Não logado e tentando acessar área protegida -> manda pro login.
+  // Rotas de API respondem 401 JSON em vez de redirect: um fetch que segue o
+  // redirect recebe o HTML do /login com status 200 e o cliente fica sem saber
+  // o que houve — com 401 o formulário mostra o erro real na hora.
   if (!user && !isPublic) {
+    if (path.startsWith('/api/')) {
+      return NextResponse.json(
+        { ok: false, error: 'Sessão expirada. Recarregue a página e entre de novo.' },
+        { status: 401 },
+      )
+    }
     const to = request.nextUrl.clone()
     to.pathname = '/login'
     to.search = ''

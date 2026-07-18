@@ -41,6 +41,7 @@ export function EditCallForm({
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ id: callId, closer_id: closer, client_name: name, call_date: date }),
+        signal: AbortSignal.timeout(20_000),
       })
       const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string }
       if (!res.ok || !data.ok) throw new Error(data.error || `Falha ao salvar (HTTP ${res.status}).`)
@@ -49,7 +50,14 @@ export function EditCallForm({
       setTimeout(() => setState((s) => (s === 'saved' ? 'idle' : s)), 2500)
     } catch (err) {
       setState('error')
-      setErrorMsg(err instanceof Error ? err.message : 'Erro inesperado ao salvar.')
+      const isTimeout = err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
+      setErrorMsg(
+        isTimeout
+          ? 'O servidor demorou demais para responder. Tente de novo em instantes.'
+          : err instanceof Error
+            ? err.message
+            : 'Erro inesperado ao salvar.',
+      )
     }
   }
 

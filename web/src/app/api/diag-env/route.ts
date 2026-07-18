@@ -23,5 +23,7 @@ export async function GET() {
     const v = process.env[k]
     out[k] = v ? `OK (len ${v.length})` : 'AUSENTE'
   }
+  // Marcador de build: confirma qual versão do código está no ar após um deploy.
+  out.BUILD_MARKER = '2026-07-18 salvar-call-via-api'
   return Response.json(out)
 }
