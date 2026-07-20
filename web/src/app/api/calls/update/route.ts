@@ -12,11 +12,21 @@ export const dynamic = 'force-dynamic'
 // silêncio. Uma rota de API com fetch funciona independente da versão da aba.
 // ---------------------------------------------------------------------------
 
+// Corre uma promise contra um teto de tempo. Evita que uma chamada de rede
+// pendurada (ex.: auth da Supabase num container frio) trave a rota para sempre.
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ])
+}
+
 export async function POST(request: Request) {
-  // Sessão obrigatória (o proxy já bloqueia, mas validamos de novo aqui).
+  // Sessão obrigatória. O proxy já bloqueia acesso sem login (retorna 401 nas
+  // rotas /api); esta é uma segunda checagem, com teto de tempo para não pendurar.
   try {
     const supabase = await createServerSupabase()
-    const { data } = await supabase.auth.getUser()
+    const { data } = await withTimeout(supabase.auth.getUser(), 8_000)
     if (!data?.user) return Response.json({ ok: false, error: 'Não autenticado.' }, { status: 401 })
   } catch {
     return Response.json({ ok: false, error: 'Falha ao validar a sessão.' }, { status: 401 })
@@ -43,10 +53,22 @@ export async function POST(request: Request) {
   if (Object.keys(patch).length === 0) return Response.json({ ok: true, message: 'Nada para salvar.' })
 
   const db = supabaseAdmin()
-  const [updRes, analysesRes] = await Promise.all([
-    db.from('calls').update(patch).eq('id', id).select('id').single(),
-    closer_id ? db.from('call_analyses').select('id').eq('call_id', id) : Promise.resolve({ data: null }),
-  ])
+  let updRes: { error: { message: string } | null }
+  let analysesRes: { data: { id: string }[] | null }
+  try {
+    ;[updRes, analysesRes] = await withTimeout(
+      Promise.all([
+        db.from('calls').update(patch).eq('id', id).select('id').single(),
+        closer_id ? db.from('call_analyses').select('id').eq('call_id', id) : Promise.resolve({ data: null }),
+      ]),
+      12_000,
+    )
+  } catch {
+    return Response.json(
+      { ok: false, error: 'O banco demorou demais para responder. Tente de novo.' },
+      { status: 504 },
+    )
+  }
   if (updRes.error) {
     return Response.json({ ok: false, error: updRes.error.message }, { status: 500 })
   }
